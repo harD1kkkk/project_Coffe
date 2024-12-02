@@ -10,10 +10,10 @@ namespace Project_Coffe.Models.ModelRealization
 
     public class OrderService : IOrderService
     {
-        private readonly DbContext _dbContext;
+        private readonly ApplicationDbContext _dbContext;
         private readonly ILogger<OrderService> _logger;
 
-        public OrderService(DbContext dbContext, ILogger<OrderService> logger)
+        public OrderService(ApplicationDbContext dbContext, ILogger<OrderService> logger)
         {
             _dbContext = dbContext;
             _logger = logger;

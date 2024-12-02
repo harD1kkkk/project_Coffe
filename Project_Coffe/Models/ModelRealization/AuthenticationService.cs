@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Project_Coffe.Entities;
 
@@ -10,9 +11,9 @@ namespace Project_Coffe.Models.ModelRealization
     {
         private readonly Jwt _jwtSettings;
 
-        public AuthenticationService(Jwt jwtSettings)
+        public AuthenticationService(IOptions<Jwt> jwtSettings)
         {
-            _jwtSettings = jwtSettings;
+            _jwtSettings = jwtSettings.Value;
         }
 
         public string GenerateToken(int userId, string role)
