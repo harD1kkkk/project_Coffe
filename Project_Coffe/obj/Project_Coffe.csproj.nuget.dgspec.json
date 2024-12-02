@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\arthu\\Desktop\\Project_Coffe\\Project_Coffe\\Project_Coffe.csproj": {}
+    "C:\\Users\\Student\\Desktop\\project_Coffe-main\\Project_Coffe\\Project_Coffe.csproj": {}
   },
   "projects": {
-    "C:\\Users\\arthu\\Desktop\\Project_Coffe\\Project_Coffe\\Project_Coffe.csproj": {
+    "C:\\Users\\Student\\Desktop\\project_Coffe-main\\Project_Coffe\\Project_Coffe.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\arthu\\Desktop\\Project_Coffe\\Project_Coffe\\Project_Coffe.csproj",
+        "projectUniqueName": "C:\\Users\\Student\\Desktop\\project_Coffe-main\\Project_Coffe\\Project_Coffe.csproj",
         "projectName": "Project_Coffe",
-        "projectPath": "C:\\Users\\arthu\\Desktop\\Project_Coffe\\Project_Coffe\\Project_Coffe.csproj",
-        "packagesPath": "C:\\Users\\arthu\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\arthu\\Desktop\\Project_Coffe\\Project_Coffe\\obj\\",
+        "projectPath": "C:\\Users\\Student\\Desktop\\project_Coffe-main\\Project_Coffe\\Project_Coffe.csproj",
+        "packagesPath": "C:\\Users\\Student\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Student\\Desktop\\project_Coffe-main\\Project_Coffe\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\arthu\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Student\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -42,9 +38,8 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "all"
-        },
-        "SdkAnalysisLevel": "9.0.100"
+          "auditMode": "direct"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -96,7 +91,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

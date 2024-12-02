@@ -10,16 +10,20 @@ namespace Project_Coffe.Models.ModelRealization
     public class UserService : IUserService
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly AuthenticationService _authService;
 
-        public UserService(ApplicationDbContext dbContext)
+        public UserService(ApplicationDbContext dbContext, AuthenticationService authService)
         {
             _dbContext = dbContext;
+            _authService = authService;
         }
 
         public async Task<User?> Register(string name, string email, string password)
         {
             if (await IsEmailTaken(email))
+            {
                 return null;
+            }
 
             var hashedPassword = HashPassword(password);
 
@@ -35,20 +39,22 @@ namespace Project_Coffe.Models.ModelRealization
             return user;
         }
 
-        public async Task<User?> Login(string email, string password)
+        public async Task<string?> Login(string email, string password)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null || !VerifyPassword(password, user.PasswordHash))
+            {
                 return null;
+            }
 
-            return user;
+            var token = _authService.GenerateToken(user.Id, "User");
+            return token;
         }
 
         public async Task<User?> GetUserById(int userId)
         {
             return await _dbContext.Users.FindAsync(userId);
         }
-
         public async Task<User?> UpdateUser(int userId, string name, string email, string password)
         {
             var user = await _dbContext.Users.FindAsync(userId);
@@ -64,7 +70,6 @@ namespace Project_Coffe.Models.ModelRealization
             await _dbContext.SaveChangesAsync();
             return user;
         }
-
         public async Task<bool> DeleteUser(int userId)
         {
             var user = await _dbContext.Users.FindAsync(userId);
@@ -75,12 +80,6 @@ namespace Project_Coffe.Models.ModelRealization
             await _dbContext.SaveChangesAsync();
             return true;
         }
-
-        public async Task<bool> IsEmailTaken(string email)
-        {
-            return await _dbContext.Users.AnyAsync(u => u.Email == email);
-        }
-
         private string HashPassword(string password)
         {
             using var sha256 = SHA256.Create();
@@ -92,6 +91,11 @@ namespace Project_Coffe.Models.ModelRealization
         {
             var hash = HashPassword(password);
             return hash == hashedPassword;
+        }
+
+        public async Task<bool> IsEmailTaken(string email)
+        {
+            return await _dbContext.Users.AnyAsync(u => u.Email == email);
         }
     }
 }

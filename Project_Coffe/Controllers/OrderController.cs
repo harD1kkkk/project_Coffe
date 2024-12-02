@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
 using Project_Coffe.Models.ModelRealization;
@@ -39,28 +40,35 @@ namespace Project_Coffe.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] Order order, [FromBody] List<OrderProduct> orderProducts)
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDTO createOrderDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
+            var order = createOrderDto.Order;
+            var orderProducts = createOrderDto.OrderProducts;
+
             await _orderService.CreateOrder(order, orderProducts);
+
             return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);
         }
 
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateOrder(int id, [FromBody] Order order, [FromBody] List<OrderProduct> orderProducts)
+        public async Task<IActionResult> UpdateOrder(int id, [FromBody] UpdateOrderDTO updateOrderDto)
         {
-            if (!ModelState.IsValid || id != order.Id)
+            if (!ModelState.IsValid || id != updateOrderDto.Order.Id)
             {
                 return BadRequest(ModelState);
             }
 
-            await _orderService.UpdateOrder(order, orderProducts);
-            return NoContent();
+            await _orderService.UpdateOrder(updateOrderDto.Order, updateOrderDto.OrderProducts);
+
+            return NoContent(); 
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
