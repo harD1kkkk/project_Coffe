@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Project_Coffe.Entities
+﻿namespace Project_Coffe.Entities
 {
     public class Order
     {
