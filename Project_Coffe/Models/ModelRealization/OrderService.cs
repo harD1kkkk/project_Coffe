@@ -1,9 +1,15 @@
+<<<<<<< HEAD
 ﻿using Project_Coffe.Data;
+=======
+﻿using Microsoft.EntityFrameworkCore;
+using Project_Coffe.Data;
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
 
 namespace Project_Coffe.Models.ModelRealization
 {
+<<<<<<< HEAD
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
@@ -13,6 +19,17 @@ namespace Project_Coffe.Models.ModelRealization
         private readonly ILogger<OrderService> _logger;
 
         public OrderService(ApplicationDbContext dbContext, ILogger<OrderService> logger)
+=======
+    using Microsoft.Extensions.Logging;
+    using Microsoft.EntityFrameworkCore;
+
+    public class OrderService : IOrderService
+    {
+        private readonly DbContext _dbContext;
+        private readonly ILogger<OrderService> _logger;
+
+        public OrderService(DbContext dbContext, ILogger<OrderService> logger)
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         {
             _dbContext = dbContext;
             _logger = logger;
@@ -20,6 +37,7 @@ namespace Project_Coffe.Models.ModelRealization
 
         public async Task<IEnumerable<Order>> GetAllOrders()
         {
+<<<<<<< HEAD
             _logger.LogInformation("Fetching all orders");
             List<Order> orders = await _dbContext.Set<Order>()
                                          .Include(o => o.OrderProducts)
@@ -27,10 +45,17 @@ namespace Project_Coffe.Models.ModelRealization
                                          .ToListAsync();
             _logger.LogInformation($"Total orders fetched: {orders.Count}");
             return orders;
+=======
+            return await _dbContext.Set<Order>()
+                                   .Include(o => o.OrderProducts)
+                                   .ThenInclude(op => op.Product)
+                                   .ToListAsync();
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         }
 
         public async Task<Order?> GetOrderById(int orderId)
         {
+<<<<<<< HEAD
             try
             {
                 _logger.LogInformation($"Fetching order with ID: {orderId}");
@@ -158,10 +183,32 @@ namespace Project_Coffe.Models.ModelRealization
                 await transaction.RollbackAsync();
                 throw;
             }
+=======
+            return await _dbContext.Set<Order>()
+                                   .Include(o => o.OrderProducts)
+                                   .ThenInclude(op => op.Product)
+                                   .FirstOrDefaultAsync(o => o.Id == orderId);
+        }
+
+        public async Task CreateOrder(Order order, List<OrderProduct> orderProducts)
+        {
+            await _dbContext.Set<Order>().AddAsync(order);
+            await _dbContext.SaveChangesAsync();
+
+            foreach (var orderProduct in orderProducts)
+            {
+                orderProduct.OrderId = order.Id;
+                await _dbContext.Set<OrderProduct>().AddAsync(orderProduct);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            _logger.LogInformation("Order created with ID: {OrderId}", order.Id);
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         }
 
         public async Task UpdateOrder(Order order, List<OrderProduct> orderProducts)
         {
+<<<<<<< HEAD
             try
             {
                 _logger.LogInformation($"Updating order for user with ID: {order.UserId}");
@@ -185,10 +232,26 @@ namespace Project_Coffe.Models.ModelRealization
                 _logger.LogError($"Error updating order with ID {order.Id}: {ex.Message}");
                 throw;
             }
+=======
+            _dbContext.Set<Order>().Update(order);
+
+            var existingOrderProducts = _dbContext.Set<OrderProduct>().Where(op => op.OrderId == order.Id);
+            _dbContext.Set<OrderProduct>().RemoveRange(existingOrderProducts);
+
+            foreach (var orderProduct in orderProducts)
+            {
+                orderProduct.OrderId = order.Id;
+                await _dbContext.Set<OrderProduct>().AddAsync(orderProduct);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            _logger.LogInformation("Order updated with ID: {OrderId}", order.Id);
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         }
 
         public async Task DeleteOrder(int orderId)
         {
+<<<<<<< HEAD
             try
             {
                 Order? order = await _dbContext.Set<Order>().FindAsync(orderId);
@@ -216,4 +279,19 @@ namespace Project_Coffe.Models.ModelRealization
             }
         }
     }
+=======
+            var order = await _dbContext.Set<Order>().FindAsync(orderId);
+            if (order != null)
+            {
+                var orderProducts = _dbContext.Set<OrderProduct>().Where(op => op.OrderId == orderId);
+                _dbContext.Set<OrderProduct>().RemoveRange(orderProducts);
+                _dbContext.Set<Order>().Remove(order);
+
+                await _dbContext.SaveChangesAsync();
+                _logger.LogInformation("Order deleted with ID: {OrderId}", orderId);
+            }
+        }
+    }
+
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
 }

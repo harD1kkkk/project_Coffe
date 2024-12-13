@@ -10,4 +10,8 @@ namespace Project_Coffe.Models.ModelInterface
         Task UpdateProduct(Product product);
         Task DeleteProduct(int productId);
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
 }

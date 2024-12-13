@@ -3,17 +3,25 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Project_Coffe.Data;
+<<<<<<< HEAD
 using Project_Coffe.Entities;
+=======
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
 using Project_Coffe.Models.ModelInterface;
 using Project_Coffe.Models.ModelRealization;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+<<<<<<< HEAD
 
 // Додати конфігурацію для з'єднання з базою даних
 builder.Services.Configure<Jwt>(builder.Configuration.GetSection("Jwt"));
 var connectionString = builder.Configuration.GetConnectionString("MySqlConnection");
+=======
+// Додати конфігурацію для з'єднання з базою даних
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
@@ -22,6 +30,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+<<<<<<< HEAD
 // Додати реєстрацію AuthenticationService
 builder.Services.AddScoped<AuthenticationService>();
 
@@ -32,6 +41,11 @@ if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer))
 {
     throw new ArgumentNullException("JWT configuration values are missing.");
 }
+=======
+// Налаштування аутентифікації за допомогою JWT
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
 
 builder.Services.AddAuthentication(options =>
 {

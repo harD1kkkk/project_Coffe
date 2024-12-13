@@ -10,6 +10,7 @@ namespace Project_Coffe.Models.ModelRealization
     public class UserService : IUserService
     {
         private readonly ApplicationDbContext _dbContext;
+<<<<<<< HEAD
         private readonly AuthenticationService _authService;
         private readonly ILogger<UserService> _logger;
 
@@ -18,10 +19,17 @@ namespace Project_Coffe.Models.ModelRealization
             _dbContext = dbContext;
             _authService = authService;
             _logger = logger;
+=======
+
+        public UserService(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         }
 
         public async Task<User?> Register(string name, string email, string password)
         {
+<<<<<<< HEAD
             try
             {
                 if (await IsEmailTaken(email))
@@ -82,10 +90,37 @@ namespace Project_Coffe.Models.ModelRealization
                 _logger.LogError($"Error during login: {ex.Message}");
                 throw new Exception("An error occurred during login.");
             }
+=======
+            if (await IsEmailTaken(email))
+                return null;
+
+            var hashedPassword = HashPassword(password);
+
+            var user = new User
+            {
+                Name = name,
+                Email = email,
+                PasswordHash = hashedPassword
+            };
+
+            _dbContext.Users.Add(user);
+            await _dbContext.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<User?> Login(string email, string password)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null || !VerifyPassword(password, user.PasswordHash))
+                return null;
+
+            return user;
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         }
 
         public async Task<User?> GetUserById(int userId)
         {
+<<<<<<< HEAD
             try
             {
                 User? user = await _dbContext.Users.FindAsync(userId);
@@ -100,10 +135,14 @@ namespace Project_Coffe.Models.ModelRealization
                 _logger.LogError($"Error fetching user with ID {userId}: {ex.Message}");
                 throw new Exception("An error occurred while fetching the user.");
             }
+=======
+            return await _dbContext.Users.FindAsync(userId);
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         }
 
         public async Task<User?> UpdateUser(int userId, string name, string email, string password)
         {
+<<<<<<< HEAD
             try
             {
                 User? user = await _dbContext.Users.FindAsync(userId);
@@ -130,10 +169,25 @@ namespace Project_Coffe.Models.ModelRealization
                 _logger.LogError($"Error updating user with ID {userId}: {ex.Message}");
                 throw new Exception("An error occurred while updating the user.");
             }
+=======
+            var user = await _dbContext.Users.FindAsync(userId);
+            if (user == null)
+                return null;
+
+            user.Name = name;
+            user.Email = email;
+            if (!string.IsNullOrWhiteSpace(password))
+                user.PasswordHash = HashPassword(password);
+
+            _dbContext.Users.Update(user);
+            await _dbContext.SaveChangesAsync();
+            return user;
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         }
 
         public async Task<bool> DeleteUser(int userId)
         {
+<<<<<<< HEAD
             try
             {
                 User? user = await _dbContext.Users.FindAsync(userId);
@@ -182,10 +236,20 @@ namespace Project_Coffe.Models.ModelRealization
                 _logger.LogError($"Error verifying password: {ex.Message}");
                 throw new Exception("An error occurred while verifying the password.");
             }
+=======
+            var user = await _dbContext.Users.FindAsync(userId);
+            if (user == null)
+                return false;
+
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
+            return true;
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         }
 
         public async Task<bool> IsEmailTaken(string email)
         {
+<<<<<<< HEAD
             try
             {
                 return await _dbContext.Users.AnyAsync(u => u.Email == email);
@@ -195,6 +259,22 @@ namespace Project_Coffe.Models.ModelRealization
                 _logger.LogError($"Error checking if email {email} is taken: {ex.Message}");
                 throw new Exception("An error occurred while checking the email.");
             }
+=======
+            return await _dbContext.Users.AnyAsync(u => u.Email == email);
+        }
+
+        private string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(hash);
+        }
+
+        private bool VerifyPassword(string password, string hashedPassword)
+        {
+            var hash = HashPassword(password);
+            return hash == hashedPassword;
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         }
     }
 }

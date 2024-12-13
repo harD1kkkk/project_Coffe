@@ -21,16 +21,27 @@ namespace Project_Coffe.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<OrderProduct>()
+<<<<<<< HEAD
+=======
+                .HasOne(op => op.Order)
+                .WithMany(o => o.OrderProducts)
+                .HasForeignKey(op => op.OrderId);
+
+            modelBuilder.Entity<OrderProduct>()
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
                 .HasOne(op => op.Product)
                 .WithMany()
                 .HasForeignKey(op => op.ProductId);
 
+<<<<<<< HEAD
             modelBuilder.Entity<OrderProduct>()
                 .HasOne(op => op.Product)         
                 .WithMany()
                 .HasForeignKey(op => op.ProductId)  
                 .OnDelete(DeleteBehavior.Cascade);  
 
+=======
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
             modelBuilder.Entity<Product>()
                 .Property(p => p.Price)
                 .HasColumnType("decimal(18,2)");
@@ -41,6 +52,9 @@ namespace Project_Coffe.Data
 
             base.OnModelCreating(modelBuilder);
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
     }
 }
