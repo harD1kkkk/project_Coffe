@@ -59,7 +59,7 @@ namespace Project_Coffe.Models.ModelRealization
 
         public async Task<Order> CreateOrUpdateOrder(int userId, List<OrderProduct> orderProducts)
         {
-            var activeOrder = await GetActiveOrder(userId);
+            Order? activeOrder = await GetActiveOrder(userId);
 
             if (activeOrder != null)
             {
@@ -75,13 +75,18 @@ namespace Project_Coffe.Models.ModelRealization
         public async Task<Order?> GetActiveOrder(int userId)
         {
             return await _dbContext.Set<Order>()
+                .Include(o => o.User)
+                .Include(o => o.OrderProducts)
+                .ThenInclude(op => op.Product)
                 .FirstOrDefaultAsync(o => o.UserId == userId && o.IsActive);
         }
 
+
         public async Task AddProductsToActiveOrder(int orderId, List<OrderProduct> orderProducts)
         {
-            var order = await _dbContext.Set<Order>()
+            Order? order = await _dbContext.Set<Order>()
                 .Include(o => o.OrderProducts)
+                .ThenInclude(op => op.Product)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
@@ -89,31 +94,47 @@ namespace Project_Coffe.Models.ModelRealization
                 throw new Exception("Order not found");
             }
 
-            foreach (var product in orderProducts)
+            decimal additionalAmount = 0;
+
+            foreach (OrderProduct product in orderProducts)
             {
+                Product? existingProduct = await _dbContext.Set<Product>().FindAsync(product.ProductId);
+
+                if (existingProduct == null)
+                {
+                    throw new Exception($"Product with ID {product.ProductId} not found");
+                }
+
+                if (existingProduct.Stock < product.Quantity)
+                {
+                    _logger.LogError($"Not enough stock for product with ID {product.ProductId}. Available: {existingProduct.Stock}, Requested: {product.Quantity}");
+                    throw new Exception($"Not enough stock for product with ID {product.ProductId}. Available: {existingProduct.Stock}, Requested: {product.Quantity}");
+                }
+                product.Product = existingProduct;
+                product.OrderId = order.Id;
+                product.CalculateSubtotal();
+                existingProduct.Stock -= product.Quantity;
+                additionalAmount += product.Subtotal;
+
                 order.OrderProducts.Add(product);
             }
+
+            order.TotalAmount += additionalAmount;
 
             _dbContext.Set<Order>().Update(order);
             await _dbContext.SaveChangesAsync();
         }
 
+
         public async Task<Order> CreateOrder(int userId, List<OrderProduct> orderProducts)
         {
-            var order = new Order
+            Order order = new Order
             {
                 UserId = userId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true,
-                OrderProducts = orderProducts
+                OrderProducts = new List<OrderProduct>()
             };
-
-            foreach (var orderProduct in orderProducts)
-            {
-                orderProduct.CalculateSubtotal();
-            }
-
-            order.CalculateTotalAmount();
 
             using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
@@ -124,28 +145,37 @@ namespace Project_Coffe.Models.ModelRealization
                 await _dbContext.SaveChangesAsync();
 
                 decimal totalAmount = 0;
+
                 foreach (OrderProduct orderProduct in orderProducts)
                 {
-                    _logger.LogInformation($"Processing product with ID: {orderProduct.ProductId}");
+                    Product? existingProduct = await _dbContext.Set<Product>()
+                                                   .FirstOrDefaultAsync(p => p.Id == orderProduct.ProductId);
 
-                    orderProduct.OrderId = order.Id;
-
-                    var product = await _dbContext.Set<Product>().FindAsync(orderProduct.ProductId);
-                    if (product == null)
+                    if (existingProduct == null)
                     {
                         _logger.LogError($"Product with ID {orderProduct.ProductId} not found.");
                         throw new Exception($"Product with ID {orderProduct.ProductId} not found.");
                     }
+                    if(existingProduct.Stock < orderProduct.Quantity)
+                    {
+                        _logger.LogError($"Not enough stock for product with ID {orderProduct.ProductId}. Available: {existingProduct.Stock}, Requested: {orderProduct.Quantity}");
+                        throw new Exception($"Not enough stock for product with ID {orderProduct.ProductId}. Available: {existingProduct.Stock}, Requested: {orderProduct.Quantity}");
+                    }
 
-                    orderProduct.Product = product;
+                    orderProduct.OrderId = order.Id;
+                    orderProduct.Product = existingProduct;
                     orderProduct.CalculateSubtotal();
-
+                    existingProduct.Stock -= orderProduct.Quantity;
                     totalAmount += orderProduct.Subtotal;
-                    _dbContext.Set<OrderProduct>().Add(orderProduct);
+
+                    order.OrderProducts.Add(orderProduct);
                 }
 
                 order.TotalAmount = totalAmount;
+                await _dbContext.Set<OrderProduct>().AddRangeAsync(orderProducts);
                 await _dbContext.SaveChangesAsync();
+
+                order.User = await _dbContext.Set<User>().FindAsync(userId);
 
                 await transaction.CommitAsync();
 

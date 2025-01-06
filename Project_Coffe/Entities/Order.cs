@@ -10,9 +10,9 @@
         public ICollection<OrderProduct> OrderProducts { get; set; } = new List<OrderProduct>();
         public decimal TotalAmount { get; set; }
 
-        public void CalculateTotalAmount()
-        {
-            TotalAmount = OrderProducts.Sum(op => op.Subtotal);
-        }
+        //public void CalculateTotalAmount()
+        //{
+        //    TotalAmount = OrderProducts.Sum(op => op.Subtotal);
+        //}
     }
 }
