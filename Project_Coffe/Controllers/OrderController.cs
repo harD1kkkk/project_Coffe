@@ -1,17 +1,8 @@
-<<<<<<< HEAD
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
-=======
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Project_Coffe.Entities;
-using Project_Coffe.Models.ModelInterface;
-using Project_Coffe.Models.ModelRealization;
-using System.Security.Claims;
->>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
 
 namespace Project_Coffe.Controllers
 {
@@ -31,7 +22,6 @@ namespace Project_Coffe.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {
-<<<<<<< HEAD
             try
             {
                 List<Order> orders = (await _orderService.GetAllOrders()).ToList();
@@ -42,16 +32,11 @@ namespace Project_Coffe.Controllers
                 _logger.LogError($"Error fetching orders: {ex.Message}");
                 return StatusCode(500, "Internal server error");
             }
-=======
-            var orders = await _orderService.GetAllOrders();
-            return Ok(orders);
->>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
-<<<<<<< HEAD
             try
             {
                 Order? order = await _orderService.GetOrderById(id);
@@ -138,44 +123,11 @@ namespace Project_Coffe.Controllers
                 _logger.LogError($"Error updating order with ID {id}: {ex.Message}");
                 return StatusCode(500, "Internal server error");
             }
-=======
-            var order = await _orderService.GetOrderById(id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-            return Ok(order);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] Order order, [FromBody] List<OrderProduct> orderProducts)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            await _orderService.CreateOrder(order, orderProducts);
-            return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateOrder(int id, [FromBody] Order order, [FromBody] List<OrderProduct> orderProducts)
-        {
-            if (!ModelState.IsValid || id != order.Id)
-            {
-                return BadRequest(ModelState);
-            }
-
-            await _orderService.UpdateOrder(order, orderProducts);
-            return NoContent();
->>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
-<<<<<<< HEAD
             try
             {
                 await _orderService.DeleteOrder(id);
@@ -189,11 +141,4 @@ namespace Project_Coffe.Controllers
             }
         }
     }
-=======
-            await _orderService.DeleteOrder(id);
-            return NoContent();
-        }
-    }
-
->>>>>>> 0d50e16b2a6a77a4377ebb9f8c716686a9238ed9
 }
