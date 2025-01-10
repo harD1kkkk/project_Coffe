@@ -22,6 +22,11 @@ namespace Project_Coffe.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid user data received");
+                    return BadRequest(ModelState);
+                }
                 if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 {
                     _logger.LogWarning("Registration failed: Missing name, email, or password.");
@@ -50,6 +55,11 @@ namespace Project_Coffe.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid user data received");
+                    return BadRequest(ModelState);
+                }
                 string? token = await _userService.Login(email, password);
                 if (token == null)
                 {
@@ -93,6 +103,11 @@ namespace Project_Coffe.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid user data received");
+                    return BadRequest(ModelState);
+                }
                 User? updatedUser = await _userService.UpdateUser(id, name, email, password);
                 if (updatedUser == null)
                 {

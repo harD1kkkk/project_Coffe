@@ -1,12 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Project_Coffe.Entities
+namespace Project_Coffe.DTO
 {
-    public class Product
+    public class UpdateProductDTO
     {
-        [Required]
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name length can't be more than 100.")]
         public string? Name { get; set; }
