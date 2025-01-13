@@ -102,7 +102,7 @@ namespace Project_Coffe.Models.ModelRealization
             }
         }
 
-        public async Task<User?> UpdateUser(int userId, string name, string email, string password)
+        public async Task<User?> UpdateUser(int userId, string name, string email, string password, string role)
         {
             try
             {
@@ -112,9 +112,19 @@ namespace Project_Coffe.Models.ModelRealization
                     _logger.LogWarning($"User with ID {userId} not found for update.");
                     return null;
                 }
-
+                if (await IsEmailTaken(email))
+                {
+                    _logger.LogWarning($"Email {email} is already taken.");
+                    return null;
+                }
+                if (MakeNormalRole(role) != "User" && MakeNormalRole(role) != "Admin")
+                {
+                    _logger.LogWarning($"Incorrect role: {role}. Expected roles: User or Admin.");
+                    return null;
+                }
                 user.Name = name;
                 user.Email = email;
+                user.Role = MakeNormalRole(role);
                 if (!string.IsNullOrWhiteSpace(password))
                 {
                     user.PasswordHash = HashPassword(password);
@@ -196,5 +206,17 @@ namespace Project_Coffe.Models.ModelRealization
                 throw new Exception("An error occurred while checking the email.");
             }
         }
+
+        public string MakeNormalRole(string role)
+        {
+            if (string.IsNullOrEmpty(role))
+            {
+                _logger.LogError("Role is null or empty.");
+                throw new ArgumentException("Role cannot be null or empty.");
+            }
+
+            return char.ToUpper(role[0]) + role.Substring(1).ToLower();
+        }
     }
 }
+
