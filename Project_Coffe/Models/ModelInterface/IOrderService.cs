@@ -10,7 +10,7 @@ namespace Project_Coffe.Models.ModelInterface
         Task<Order> CreateOrder(int userId, List<OrderProduct> orderProducts);
         Task<Order> CreateOrUpdateOrder(int userId, List<OrderProduct> orderProducts);
         Task AddProductsToActiveOrder(int orderId, List<OrderProduct> orderProducts);
-        Task UpdateOrder(Order order, List<OrderProduct> orderProducts);
+        Task UpdateOrder(Order order);
         Task DeleteOrder(int orderId);
     }
 }

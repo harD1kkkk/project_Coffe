@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
 
@@ -22,6 +23,11 @@ namespace Project_Coffe.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid user data received");
+                    return BadRequest(ModelState);
+                }
                 if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 {
                     _logger.LogWarning("Registration failed: Missing name, email, or password.");
@@ -50,6 +56,11 @@ namespace Project_Coffe.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid user data received");
+                    return BadRequest(ModelState);
+                }
                 string? token = await _userService.Login(email, password);
                 if (token == null)
                 {
@@ -67,6 +78,7 @@ namespace Project_Coffe.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
@@ -88,12 +100,18 @@ namespace Project_Coffe.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, string name, string email, string password)
+        public async Task<IActionResult> UpdateUser(int id, string name, string email, string password, string role)
         {
             try
             {
-                User? updatedUser = await _userService.UpdateUser(id, name, email, password);
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid user data received");
+                    return BadRequest(ModelState);
+                }
+                User? updatedUser = await _userService.UpdateUser(id, name, email, password, role);
                 if (updatedUser == null)
                 {
                     _logger.LogWarning($"Update failed: User with ID {id} not found.");
@@ -110,6 +128,7 @@ namespace Project_Coffe.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
