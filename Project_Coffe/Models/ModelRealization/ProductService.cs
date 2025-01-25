@@ -79,8 +79,8 @@ namespace CoffeeShopAPI.Services
                     throw new ArgumentNullException(nameof(product), "Product cannot be null.");
                 }
 
-                Product? existingProduct = await _dbContext.Set<Product>().FindAsync(product.Id);
-                if (existingProduct == null)
+                bool existingProduct = await _dbContext.Products.AnyAsync(i => i.Id == product.Id);
+                if (!existingProduct)
                 {
                     _logger.LogWarning($"Product with ID {product.Id} not found for update.");
                     throw new KeyNotFoundException($"Product with ID {product.Id} not found.");
@@ -94,6 +94,52 @@ namespace CoffeeShopAPI.Services
             {
                 _logger.LogError($"Error updating product with ID {product.Id}: {ex.Message}");
                 throw new Exception("An error occurred while updating the product.");
+            }
+        }
+
+        public async Task UpdateProductImage(int productId, Product product)
+        {
+            try
+            {
+                Product? existingProduct = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);
+                if (existingProduct == null)
+                {
+                    _logger.LogWarning($"Product with ID {productId} not found.");
+                    throw new KeyNotFoundException($"Product with ID {productId} not found.");
+                }
+
+                existingProduct.ImagePath = product.ImagePath;
+
+                _dbContext.Products.Update(existingProduct);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error updating product image with ID {productId}: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task UpdateProductMusic(int productId, Product product)
+        {
+            try
+            {
+                Product? existingProduct = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);
+                if (existingProduct == null)
+                {
+                    _logger.LogWarning($"Product with ID {productId} not found.");
+                    throw new KeyNotFoundException($"Product with ID {productId} not found.");
+                }
+
+                existingProduct.MusicPath = product.MusicPath;
+
+                _dbContext.Products.Update(existingProduct);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error updating product music with ID {productId}: {ex.Message}");
+                throw;
             }
         }
 
@@ -116,6 +162,71 @@ namespace CoffeeShopAPI.Services
             {
                 _logger.LogError($"Error deleting product with ID {productId}: {ex.Message}");
                 throw new Exception("An error occurred while deleting the product.");
+            }
+        }
+
+        public async Task<IEnumerable<Product>> SearchByName(string name)
+        {
+            try
+            {
+                IEnumerable<Product> products = await _dbContext.Set<Product>()
+                    .Where(p => p.Name != null && p.Name.Contains(name))
+                    .OrderBy(p => p.Name)
+                    .ToListAsync();
+                return products;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products with name containing '{name}': {ex.Message}");
+                throw new Exception("An error occurred while fetching the products.");
+            }
+        }
+
+        public async Task<IEnumerable<Product>> SearchByPrice(decimal price)
+        {
+            try
+            {
+                IEnumerable<Product> products = await _dbContext.Set<Product>()
+                    .Where(p => p.Price <= price)
+                    .ToListAsync();
+                return products;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products with price {price}: {ex.Message}");
+                throw new Exception("An error occurred while fetching the products.");
+            }
+        }
+
+        public async Task<IEnumerable<Product>> SortByLowerPrice()
+        {
+            try
+            {
+                IEnumerable<Product> products = await _dbContext.Set<Product>()
+                    .OrderBy(p => p.Price)
+                    .ToListAsync();
+                return products;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products sorted by lower price: {ex.Message}");
+                throw new Exception("An error occurred while fetching the products.");
+            }
+        }
+
+        public async Task<IEnumerable<Product>> SortByHigherPrice()
+        {
+            try
+            {
+                IEnumerable<Product> products = await _dbContext.Set<Product>()
+                    .OrderByDescending(p => p.Price)
+                    .ToListAsync();
+                return products;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products sorted by higher price: {ex.Message}");
+                throw new Exception("An error occurred while fetching the products.");
             }
         }
     }

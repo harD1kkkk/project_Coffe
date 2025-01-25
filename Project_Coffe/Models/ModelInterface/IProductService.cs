@@ -8,6 +8,12 @@ namespace Project_Coffe.Models.ModelInterface
         Task<Product?> GetProductById(int productId);
         Task CreateProduct(Product product);
         Task UpdateProduct(Product product);
+        Task UpdateProductImage(int productId, Product product);
+        Task UpdateProductMusic(int productId, Product product);
         Task DeleteProduct(int productId);
+        Task<IEnumerable<Product>> SearchByName(string name);
+        Task<IEnumerable<Product>> SearchByPrice(decimal price);
+        Task<IEnumerable<Product>> SortByLowerPrice();
+        Task<IEnumerable<Product>> SortByHigherPrice();
     }
 }
