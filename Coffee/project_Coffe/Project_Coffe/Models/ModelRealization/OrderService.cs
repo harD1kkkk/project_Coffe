@@ -79,6 +79,7 @@ namespace Project_Coffe.Models.ModelRealization
                 .FirstOrDefaultAsync(o => o.UserId == userId && o.IsActive);
         }
 
+
         public async Task AddProductsToActiveOrder(int orderId, List<OrderProduct> orderProducts)
         {
             Order? order = await _dbContext.Set<Order>()
@@ -121,6 +122,7 @@ namespace Project_Coffe.Models.ModelRealization
             _dbContext.Set<Order>().Update(order);
             await _dbContext.SaveChangesAsync();
         }
+
 
         public async Task<Order> CreateOrder(int userId, List<OrderProduct> orderProducts)
         {
