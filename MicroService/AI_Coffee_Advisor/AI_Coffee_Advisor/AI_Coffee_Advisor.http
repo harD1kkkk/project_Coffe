@@ -1,0 +1,6 @@
+@AI_Coffee_Advisor_HostAddress = http://localhost:5064
+
+GET {{AI_Coffee_Advisor_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
