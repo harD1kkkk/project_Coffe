@@ -28,6 +28,7 @@ namespace Project_Coffe.Models.ModelRealization
                 await _dbContext.Set<UserPreference>().AddAsync(preferences);
                 await _dbContext.SaveChangesAsync();
                 string? response = "";
+                int count = 0;
 
                 while (true)
                 {
@@ -39,6 +40,12 @@ namespace Project_Coffe.Models.ModelRealization
                     }
                     if (userPreference.ResponseFromMircoService == false)
                     {
+                        if (count > 10)
+                        {
+                            _logger.LogWarning($"Something wrong with micro service.");
+                            break;
+                        }
+                        count++;
                         await Task.Delay(1000);
                     }
                     if (userPreference.ResponseFromMircoService)

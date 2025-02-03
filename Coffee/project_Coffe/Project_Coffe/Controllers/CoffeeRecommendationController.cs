@@ -50,6 +50,10 @@ namespace Project_Coffe.Controllers
                 };
                 string response = await _coffeeRecommendation.SendToMicroServiceCoffeeRecommendation(userpreferences);
                 _logger.LogInformation("Coffee recommendation sent successfully.");
+                if (response == null)
+                {
+                    return StatusCode(500, "Internal server error");
+                }
                 return Ok(response);
 
             }

@@ -38,7 +38,7 @@ namespace AI_Coffee_Advisor.Model.ModelRealization
                     try
                     {
                         string preferencesDescription = preference.ToDescription();
-                        string query = $"Recommend coffee with the following descriptions: {preferencesDescription}";
+                        string query = $"Imagine that you are a coffee expert and know everything in such detail about the flavours of coffee that you know every single bean just by looking at it and Recommend coffee with the following descriptions: {preferencesDescription}";
                         string apiUrl = $"https://free-unoficial-gpt4o-mini-api-g70n.onrender.com/chat/?query={query}";
 
                         var response = await _httpClient.GetAsync(apiUrl);
