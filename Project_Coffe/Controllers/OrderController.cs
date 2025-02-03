@@ -20,7 +20,7 @@ namespace Project_Coffe.Controllers
         }
 
         [Authorize]
-        [HttpGet("get-all-orders")]
+        [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {
             try
@@ -36,7 +36,7 @@ namespace Project_Coffe.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("get-order-by-id/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
             try
@@ -57,7 +57,7 @@ namespace Project_Coffe.Controllers
         }
 
         [Authorize]
-        [HttpPost("create-order")]
+        [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDTO createOrderDto)
         {
             try
@@ -95,7 +95,7 @@ namespace Project_Coffe.Controllers
         }
 
         [Authorize]
-        [HttpPut("update-order/{id}")]
+        [HttpPut]
         public async Task<IActionResult> UpdateOrder(int id, [FromBody] UpdateOrderDTO updateOrderDto)
         {
             try
@@ -139,7 +139,7 @@ namespace Project_Coffe.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpDelete("delete-order/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             try

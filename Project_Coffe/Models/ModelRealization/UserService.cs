@@ -102,6 +102,20 @@ namespace Project_Coffe.Models.ModelRealization
             }
         }
 
+        public async Task<IEnumerable<User>> GetAllUsers()
+        {
+            try
+            {
+                IEnumerable<User> users = await _dbContext.Users.ToListAsync();
+                return users;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching all users: {ex.Message}");
+                throw new Exception("An error occurred while fetching users.");
+            }
+        }
+
         public async Task<User?> UpdateUser(int userId, string name, string email, string password, string role)
         {
             try

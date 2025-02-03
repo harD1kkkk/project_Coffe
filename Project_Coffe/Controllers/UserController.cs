@@ -79,7 +79,8 @@ namespace Project_Coffe.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("get-user-by-id/{id}")]
+        [HttpGet("{id}")]
+
         public async Task<IActionResult> GetUserById(int id)
         {
             try
@@ -101,7 +102,23 @@ namespace Project_Coffe.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPut("update-user/{id}")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            try
+            {
+                IEnumerable<User> users = await _userService.GetAllUsers();
+                return Ok(users.Select(u => new { u.Id, u.Name, u.Email, u.PasswordHash, u.Role }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching all users: {ex.Message}");
+                return StatusCode(500, "An error occurred while fetching users.");
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, string name, string email, string password, string role)
         {
             try
@@ -129,7 +146,7 @@ namespace Project_Coffe.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpDelete("delete-user/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             try

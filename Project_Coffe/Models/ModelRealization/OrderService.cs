@@ -144,7 +144,7 @@ namespace Project_Coffe.Models.ModelRealization
                 await _dbContext.Set<Order>().AddAsync(order);
                 await _dbContext.SaveChangesAsync();
 
-                decimal totalAmount = 0;
+                int totalAmountKopek = 0;
 
                 foreach (OrderProduct orderProduct in orderProducts)
                 {
@@ -156,22 +156,23 @@ namespace Project_Coffe.Models.ModelRealization
                         _logger.LogError($"Product with ID {orderProduct.ProductId} not found.");
                         throw new Exception($"Product with ID {orderProduct.ProductId} not found.");
                     }
-                  if (existingProduct.Stock < product.Quantity)
+
+                    if (existingProduct.Stock < orderProduct.Quantity)
                     {
-                    _logger.LogError($"Not enough stock for product with ID {product.ProductId}. Available: {existingProduct.Stock}, Requested: {product.Quantity}");
-                    throw new Exception($"Not enough stock for product with ID {product.ProductId}. Available: {existingProduct.Stock}, Requested: {product.Quantity}");
+                        _logger.LogError($"Not enough stock for product with ID {orderProduct.ProductId}. Available: {existingProduct.Stock}, Requested: {orderProduct.Quantity}");
+                        throw new Exception($"Not enough stock for product with ID {orderProduct.ProductId}. Available: {existingProduct.Stock}, Requested: {orderProduct.Quantity}");
                     }
                     
                     orderProduct.OrderId = order.Id;
                     orderProduct.Product = existingProduct;
                     orderProduct.CalculateSubtotal();
                     existingProduct.Stock -= orderProduct.Quantity;
-                    totalAmount += orderProduct.Subtotal;
+                    totalAmountKopek += ConvertDecimalToInt(orderProduct.Subtotal);
 
                     order.OrderProducts.Add(orderProduct);
                 }
 
-                order.TotalAmount = totalAmount;
+                order.TotalAmount = ConvertIntToDecimal(totalAmountKopek); ;
                 await _dbContext.Set<OrderProduct>().AddRangeAsync(orderProducts);
                 await _dbContext.SaveChangesAsync();
 
@@ -188,6 +189,15 @@ namespace Project_Coffe.Models.ModelRealization
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        private int ConvertDecimalToInt(decimal value)
+        {
+            return (int)Math.Round(value * 100);
+        }
+        private decimal ConvertIntToDecimal(int value)
+        {
+            return value / 100m;
         }
 
         public async Task UpdateOrder(Order order)

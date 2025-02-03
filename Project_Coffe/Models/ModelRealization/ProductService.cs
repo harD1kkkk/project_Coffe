@@ -120,7 +120,6 @@ namespace CoffeeShopAPI.Services
             }
         }
 
-
         public async Task UpdateProductMusic(int productId, Product product)
         {
             try
@@ -163,6 +162,71 @@ namespace CoffeeShopAPI.Services
             {
                 _logger.LogError($"Error deleting product with ID {productId}: {ex.Message}");
                 throw new Exception("An error occurred while deleting the product.");
+            }
+        }
+
+        public async Task<IEnumerable<Product>> SearchByName(string name)
+        {
+            try
+            {
+                IEnumerable<Product> products = await _dbContext.Set<Product>()
+                    .Where(p => p.Name != null && p.Name.Contains(name))
+                    .OrderBy(p => p.Name)
+                    .ToListAsync();
+                return products;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products with name containing '{name}': {ex.Message}");
+                throw new Exception("An error occurred while fetching the products.");
+            }
+        }
+
+        public async Task<IEnumerable<Product>> SearchByPrice(decimal price)
+        {
+            try
+            {
+                IEnumerable<Product> products = await _dbContext.Set<Product>()
+                    .Where(p => p.Price <= price)
+                    .ToListAsync();
+                return products;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products with price {price}: {ex.Message}");
+                throw new Exception("An error occurred while fetching the products.");
+            }
+        }
+
+        public async Task<IEnumerable<Product>> SortByLowerPrice()
+        {
+            try
+            {
+                IEnumerable<Product> products = await _dbContext.Set<Product>()
+                    .OrderBy(p => p.Price)
+                    .ToListAsync();
+                return products;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products sorted by lower price: {ex.Message}");
+                throw new Exception("An error occurred while fetching the products.");
+            }
+        }
+
+        public async Task<IEnumerable<Product>> SortByHigherPrice()
+        {
+            try
+            {
+                IEnumerable<Product> products = await _dbContext.Set<Product>()
+                    .OrderByDescending(p => p.Price)
+                    .ToListAsync();
+                return products;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products sorted by higher price: {ex.Message}");
+                throw new Exception("An error occurred while fetching the products.");
             }
         }
     }

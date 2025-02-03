@@ -22,8 +22,8 @@ namespace Project_Coffe.Controllers
             _environment = environment;
         }
 
-        //[Authorize]
-        [HttpGet("get-all-products")]
+        [Authorize]
+        [HttpGet]
         public async Task<IActionResult> GetAllProducts()
         {
             try
@@ -40,7 +40,7 @@ namespace Project_Coffe.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("get-product-by-id/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
             try
@@ -62,8 +62,8 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        //[Authorize(Roles = "Admin")]
-        [HttpPost("create-product-and-upload")]
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
         public async Task<IActionResult> CreateProductAndUpload(IFormFile imageFile, IFormFile musicFile, [FromForm] CreateProductDTO productDto)
         {
             try
@@ -92,15 +92,16 @@ namespace Project_Coffe.Controllers
                     return BadRequest(ModelState);
                 }
 
+                string defaultPath = "C:/project_Coffe/Project_Coffe/wwwroot";
                 Product product = new Product
                 {
                     Name = productDto.Name,
                     Price = productDto.Price,
                     Description = productDto.Description,
                     Stock = productDto.Stock,
-                    ImagePath = $"/images/{imageFile.FileName}",
-                    MusicPath = $"/music/{musicFile.FileName}"
-                };
+                    ImagePath = $"{defaultPath}/images/{imageFile.FileName}",
+                    MusicPath = $"{defaultPath}/music/{musicFile.FileName}"
+                    };
 
                 await _productService.CreateProduct(product);
                 _logger.LogInformation($"Product with ID {product.Id} created successfully.");
@@ -147,7 +148,7 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("update-imageFile/{id}")]
         public async Task<IActionResult> UpdateProductImageFile(int id, IFormFile imageFile)
         {
@@ -172,7 +173,8 @@ namespace Project_Coffe.Controllers
                     await imageFile.CopyToAsync(stream);
                 }
 
-                existingProduct.ImagePath = $"/images/{imageFile.FileName}";
+                string defaultPath = "C:/project_Coffe/Project_Coffe/wwwroot";
+                existingProduct.ImagePath = $"{defaultPath}/images/{imageFile.FileName}";
 
                 await _productService.UpdateProductImage(id, existingProduct);
                 _logger.LogInformation($"Product Image with ID {id} updated successfully.");
@@ -186,8 +188,8 @@ namespace Project_Coffe.Controllers
         }
 
 
-        //[Authorize(Roles = "Admin")]
-        [HttpPut("update-MusicFile/{id}")]
+        [Authorize(Roles = "Admin")]
+        [HttpPut("update-musicFile/{id}")]
         public async Task<IActionResult> UpdateProductMusicFile(int id, IFormFile musicFile)
         {
             try
@@ -205,13 +207,14 @@ namespace Project_Coffe.Controllers
                     return NotFound($"Product with ID {id} not found.");
                 }
 
-                string musicPath = Path.Combine(_environment.WebRootPath, "Music", musicFile.FileName);
+                string musicPath = Path.Combine(_environment.WebRootPath, "music", musicFile.FileName);
                 using (var stream = new FileStream(musicPath, FileMode.Create))
                 {
                     await musicFile.CopyToAsync(stream);
                 }
 
-                existingProduct.MusicPath = $"/Music/{musicFile.FileName}";
+                string defaultPath = "C:/project_Coffe/Project_Coffe/wwwroot";
+                existingProduct.MusicPath = $"{defaultPath}/music/{musicFile.FileName}";
 
                 await _productService.UpdateProductImage(id, existingProduct);
                 _logger.LogInformation($"Product Music with ID {id} updated successfully.");
@@ -225,7 +228,7 @@ namespace Project_Coffe.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpDelete("delete-product/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             try
@@ -241,5 +244,83 @@ namespace Project_Coffe.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPut("search-by-name")]
+        public async Task<IActionResult> SearchByName(string name)
+        {
+            try
+            {
+                List<Product> products = (await _productService.SearchByName(name)).ToList();
+                if (!products.Any())
+                {
+                    _logger.LogInformation($"No products found with name containing '{name}'.");
+                    return NotFound($"No products found with name containing '{name}'.");
+                }
+
+                _logger.LogInformation("Fetched products successfully.");
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products: {ex.Message}");
+                return StatusCode(500, "An error occurred while fetching the products.");
+            }
+        }
+
+        [Authorize]
+        [HttpPut("search-by-price")]
+        public async Task<IActionResult> SearchByPrice(decimal price)
+        {
+            try
+            {
+                List<Product> products = (await _productService.SearchByPrice(price)).ToList();
+                if (!products.Any())
+                {
+                    _logger.LogInformation($"No products found with price equal to '{price}'.");
+                    return NotFound($"No products found with price equal to '{price}'.");
+                }
+                _logger.LogInformation("Fetched products successfully.");
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products: {ex.Message}");
+                return StatusCode(500, "An error occurred while fetching the products.");
+            }
+        }
+
+        [Authorize]
+        [HttpGet("sort-by-lower-price")]
+        public async Task<IActionResult> SortByLowerPrice()
+        {
+            try
+            {
+                List<Product> products = (await _productService.SortByLowerPrice()).ToList();
+                _logger.LogInformation("Fetched products successfully.");
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products: {ex.Message}");
+                return StatusCode(500, "An error occurred while fetching the products.");
+            }
+        }
+
+        [Authorize]
+        [HttpGet("sort-by-higher-price")]
+        public async Task<IActionResult> SortByHigherPrice()
+        {
+            try
+            {
+                List<Product> products = (await _productService.SortByHigherPrice()).ToList();
+                _logger.LogInformation("Fetched products successfully.");
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching products: {ex.Message}");
+                return StatusCode(500, "An error occurred while fetching the products.");
+            }
+        }
     }
 }
