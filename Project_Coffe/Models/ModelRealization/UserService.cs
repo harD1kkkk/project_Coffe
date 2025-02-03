@@ -131,14 +131,14 @@ namespace Project_Coffe.Models.ModelRealization
                     _logger.LogWarning($"Email {email} is already taken.");
                     return null;
                 }
-                if (MakeNormalRole(role) != "User" && MakeNormalRole(role) != "Admin")
+                if (NormalizeRole(role) != "User" && NormalizeRole(role) != "Admin")
                 {
                     _logger.LogWarning($"Incorrect role: {role}. Expected roles: User or Admin.");
                     return null;
                 }
                 user.Name = name;
                 user.Email = email;
-                user.Role = MakeNormalRole(role);
+                user.Role = NormalizeRole(role);
                 if (!string.IsNullOrWhiteSpace(password))
                 {
                     user.PasswordHash = HashPassword(password);
@@ -221,7 +221,7 @@ namespace Project_Coffe.Models.ModelRealization
             }
         }
 
-        public string MakeNormalRole(string role)
+        private string NormalizeRole(string role)
         {
             if (string.IsNullOrEmpty(role))
             {

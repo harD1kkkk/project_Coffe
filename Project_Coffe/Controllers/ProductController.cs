@@ -1,6 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
@@ -101,7 +100,7 @@ namespace Project_Coffe.Controllers
                     Stock = productDto.Stock,
                     ImagePath = $"{defaultPath}/images/{imageFile.FileName}",
                     MusicPath = $"{defaultPath}/music/{musicFile.FileName}"
-                    };
+                };
 
                 await _productService.CreateProduct(product);
                 _logger.LogInformation($"Product with ID {product.Id} created successfully.");
@@ -245,74 +244,18 @@ namespace Project_Coffe.Controllers
         }
 
         [Authorize]
-        [HttpPut("search-by-name")]
-        public async Task<IActionResult> SearchByName(string name)
+        [HttpPut("search-and-sort")]
+        public async Task<IActionResult> SearchAndSort([FromBody] ProductFilterDto filter)
         {
             try
             {
-                List<Product> products = (await _productService.SearchByName(name)).ToList();
+                List<Product> products = (await _productService.SearchAndSort(filter)).ToList();
                 if (!products.Any())
                 {
-                    _logger.LogInformation($"No products found with name containing '{name}'.");
-                    return NotFound($"No products found with name containing '{name}'.");
+                    _logger.LogInformation("No products found matching the provided filters.");
+                    return NotFound("No products found matching the provided filters.");
                 }
 
-                _logger.LogInformation("Fetched products successfully.");
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error fetching products: {ex.Message}");
-                return StatusCode(500, "An error occurred while fetching the products.");
-            }
-        }
-
-        [Authorize]
-        [HttpPut("search-by-price")]
-        public async Task<IActionResult> SearchByPrice(decimal price)
-        {
-            try
-            {
-                List<Product> products = (await _productService.SearchByPrice(price)).ToList();
-                if (!products.Any())
-                {
-                    _logger.LogInformation($"No products found with price equal to '{price}'.");
-                    return NotFound($"No products found with price equal to '{price}'.");
-                }
-                _logger.LogInformation("Fetched products successfully.");
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error fetching products: {ex.Message}");
-                return StatusCode(500, "An error occurred while fetching the products.");
-            }
-        }
-
-        [Authorize]
-        [HttpGet("sort-by-lower-price")]
-        public async Task<IActionResult> SortByLowerPrice()
-        {
-            try
-            {
-                List<Product> products = (await _productService.SortByLowerPrice()).ToList();
-                _logger.LogInformation("Fetched products successfully.");
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error fetching products: {ex.Message}");
-                return StatusCode(500, "An error occurred while fetching the products.");
-            }
-        }
-
-        [Authorize]
-        [HttpGet("sort-by-higher-price")]
-        public async Task<IActionResult> SortByHigherPrice()
-        {
-            try
-            {
-                List<Product> products = (await _productService.SortByHigherPrice()).ToList();
                 _logger.LogInformation("Fetched products successfully.");
                 return Ok(products);
             }

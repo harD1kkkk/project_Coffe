@@ -1,4 +1,5 @@
-﻿using Project_Coffe.Entities;
+﻿using Project_Coffe.DTO;
+using Project_Coffe.Entities;
 
 namespace Project_Coffe.Models.ModelInterface
 {
@@ -11,9 +12,6 @@ namespace Project_Coffe.Models.ModelInterface
         Task UpdateProductImage(int productId, Product product);
         Task UpdateProductMusic(int productId, Product product);
         Task DeleteProduct(int productId);
-        Task<IEnumerable<Product>> SearchByName(string name);
-        Task<IEnumerable<Product>> SearchByPrice(decimal price);
-        Task<IEnumerable<Product>> SortByLowerPrice();
-        Task<IEnumerable<Product>> SortByHigherPrice();
+        Task<IEnumerable<Product>> SearchAndSort(ProductFilterDto filter);
     }
 }

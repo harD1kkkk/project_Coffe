@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Project_Coffe.Data;
+using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
 
@@ -165,67 +166,39 @@ namespace CoffeeShopAPI.Services
             }
         }
 
-        public async Task<IEnumerable<Product>> SearchByName(string name)
+        public async Task<IEnumerable<Product>> SearchAndSort(ProductFilterDto filter)
         {
             try
             {
-                IEnumerable<Product> products = await _dbContext.Set<Product>()
-                    .Where(p => p.Name != null && p.Name.Contains(name))
-                    .OrderBy(p => p.Name)
-                    .ToListAsync();
-                return products;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error fetching products with name containing '{name}': {ex.Message}");
-                throw new Exception("An error occurred while fetching the products.");
-            }
-        }
+                IQueryable<Product> products = _dbContext.Set<Product>();
 
-        public async Task<IEnumerable<Product>> SearchByPrice(decimal price)
-        {
-            try
-            {
-                IEnumerable<Product> products = await _dbContext.Set<Product>()
-                    .Where(p => p.Price <= price)
-                    .ToListAsync();
-                return products;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error fetching products with price {price}: {ex.Message}");
-                throw new Exception("An error occurred while fetching the products.");
-            }
-        }
+                if (!string.IsNullOrEmpty(filter.Name))
+                {
+                    products = products.Where(p => p.Name != null && p.Name.Contains(filter.Name));
+                }
 
-        public async Task<IEnumerable<Product>> SortByLowerPrice()
-        {
-            try
-            {
-                IEnumerable<Product> products = await _dbContext.Set<Product>()
-                    .OrderBy(p => p.Price)
-                    .ToListAsync();
-                return products;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error fetching products sorted by lower price: {ex.Message}");
-                throw new Exception("An error occurred while fetching the products.");
-            }
-        }
+                if (filter.Price.HasValue)
+                {
+                    products = products.Where(p => p.Price <= filter.Price);
+                }
 
-        public async Task<IEnumerable<Product>> SortByHigherPrice()
-        {
-            try
-            {
-                IEnumerable<Product> products = await _dbContext.Set<Product>()
-                    .OrderByDescending(p => p.Price)
-                    .ToListAsync();
-                return products;
+                if (filter.SortLowOrHighPrice.HasValue)
+                {
+                    if (filter.SortLowOrHighPrice == true)
+                    {
+                        products = products.OrderBy(p => p.Price);
+                    }
+                    else
+                    {
+                        products = products.OrderByDescending(p => p.Price);
+                    }
+                }
+
+                return await products.ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error fetching products sorted by higher price: {ex.Message}");
+                _logger.LogError($"Error fetching filtered products: {ex.Message}");
                 throw new Exception("An error occurred while fetching the products.");
             }
         }
