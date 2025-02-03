@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
@@ -97,25 +96,35 @@ namespace Project_Coffe.Controllers
         {
             try
             {
-                if (updateOrderDto.Order == null)
-                {
-                    _logger.LogWarning("UpdateOrder: Order is null.");
-                    return BadRequest("Order cannot be null.");
-                }
-
-                if (!ModelState.IsValid || id != updateOrderDto.Order.Id)
+                if (!ModelState.IsValid)
                 {
                     _logger.LogWarning($"Invalid request data for updating order with ID {id}.");
                     return BadRequest(ModelState);
                 }
 
-                if (updateOrderDto.OrderProducts == null)
+                Order? order = await _orderService.GetOrderById(id);
+                if (order == null)
                 {
-                    _logger.LogWarning($"Order products list is null for order with ID {id}.");
-                    return BadRequest("Order products cannot be null.");
+                    _logger.LogWarning($"Order with ID {id} not found.");
+                    return NotFound();
                 }
 
-                await _orderService.UpdateOrder(updateOrderDto.Order, updateOrderDto.OrderProducts);
+                order.UserId = updateOrderDto.UserId;
+                order.IsActive = updateOrderDto.IsActive;
+                order.TotalAmount = updateOrderDto.TotalAmount;
+
+                List<OrderProduct> orderProducts = updateOrderDto.OrderProducts.Select(op => new OrderProduct
+                {
+                    OrderId = id,
+                    ProductId = op.ProductId,
+                    Quantity = op.Quantity,
+                    Subtotal = op.Subtotal
+                }).ToList();
+
+                order.OrderProducts = orderProducts;
+
+                await _orderService.UpdateOrder(order);
+
                 return NoContent();
             }
             catch (Exception ex)

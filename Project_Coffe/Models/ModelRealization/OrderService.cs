@@ -156,6 +156,7 @@ namespace Project_Coffe.Models.ModelRealization
                         _logger.LogError($"Product with ID {orderProduct.ProductId} not found.");
                         throw new Exception($"Product with ID {orderProduct.ProductId} not found.");
                     }
+
                     if(existingProduct.Stock < orderProduct.Quantity)
                     {
                         _logger.LogError($"Not enough stock for product with ID {orderProduct.ProductId}. Available: {existingProduct.Stock}, Requested: {orderProduct.Quantity}");
@@ -190,7 +191,7 @@ namespace Project_Coffe.Models.ModelRealization
             }
         }
 
-        public async Task UpdateOrder(Order order, List<OrderProduct> orderProducts)
+        public async Task UpdateOrder(Order order)
         {
             try
             {
@@ -198,10 +199,12 @@ namespace Project_Coffe.Models.ModelRealization
 
                 _dbContext.Set<Order>().Update(order);
 
-                List<OrderProduct> existingOrderProducts = await _dbContext.Set<OrderProduct>().Where(op => op.OrderId == order.Id).ToListAsync();
+                List<OrderProduct> existingOrderProducts = await _dbContext.Set<OrderProduct>()
+                    .Where(op => op.OrderId == order.Id)
+                    .ToListAsync();
                 _dbContext.Set<OrderProduct>().RemoveRange(existingOrderProducts);
 
-                foreach (OrderProduct orderProduct in orderProducts)
+                foreach (OrderProduct orderProduct in order.OrderProducts)
                 {
                     orderProduct.OrderId = order.Id;
                     await _dbContext.Set<OrderProduct>().AddAsync(orderProduct);

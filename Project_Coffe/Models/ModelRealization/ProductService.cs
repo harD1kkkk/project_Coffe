@@ -79,8 +79,8 @@ namespace CoffeeShopAPI.Services
                     throw new ArgumentNullException(nameof(product), "Product cannot be null.");
                 }
 
-                Product? existingProduct = await _dbContext.Set<Product>().FindAsync(product.Id);
-                if (existingProduct == null)
+                bool existingProduct = await _dbContext.Products.AnyAsync(i => i.Id == product.Id);
+                if (!existingProduct)
                 {
                     _logger.LogWarning($"Product with ID {product.Id} not found for update.");
                     throw new KeyNotFoundException($"Product with ID {product.Id} not found.");

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
 
@@ -10,11 +11,13 @@ namespace Project_Coffe.Controllers
     {
         private readonly IProductService _productService;
         private readonly ILogger<ProductController> _logger;
+        private readonly IWebHostEnvironment _environment;
 
-        public ProductController(IProductService productService, ILogger<ProductController> logger)
+        public ProductController(IProductService productService, ILogger<ProductController> logger, IWebHostEnvironment environment)
         {
             _productService = productService;
             _logger = logger;
+            _environment = environment;
         }
 
         [HttpGet]
@@ -55,16 +58,43 @@ namespace Project_Coffe.Controllers
             }
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> CreateProduct([FromBody] Product product)
+        public async Task<IActionResult> CreateProductAndUpload(IFormFile imageFile, IFormFile musicFile, [FromForm] CreateProductDTO productDto)
         {
             try
             {
+                if (imageFile == null || musicFile == null || imageFile.Length == 0 || musicFile.Length == 0)
+                {
+                    _logger.LogWarning("Upload failed: One or more files are missing or empty.");
+                    return BadRequest("Both image and music files are required.");
+                }
+
+                string imagePath = Path.Combine(_environment.WebRootPath, "images", imageFile.FileName);
+                using (var stream = new FileStream(imagePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                string musicPath = Path.Combine(_environment.WebRootPath, "music", musicFile.FileName);
+                using (var stream = new FileStream(musicPath, FileMode.Create))
+                {
+                    await musicFile.CopyToAsync(stream);
+                }
+
                 if (!ModelState.IsValid)
                 {
                     _logger.LogWarning("Product creation failed: Invalid model state.");
                     return BadRequest(ModelState);
                 }
+
+                Product product = new Product
+                {
+                    Name = productDto.Name,
+                    Price = productDto.Price,
+                    ImagePath = $"/images/{imageFile.FileName}",
+                    MusicPath = $"/music/{musicFile.FileName}"
+                };
 
                 await _productService.CreateProduct(product);
                 _logger.LogInformation($"Product with ID {product.Id} created successfully.");
@@ -78,15 +108,26 @@ namespace Project_Coffe.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductDTO productDto)
         {
             try
             {
-                if (!ModelState.IsValid || id != product.Id)
+                if (!ModelState.IsValid)
                 {
                     _logger.LogWarning($"Update failed: Invalid model or ID mismatch for product {id}.");
                     return BadRequest(ModelState);
                 }
+
+                Product product = new Product
+                {
+                    Id = id,
+                    Name = productDto.Name,
+                    Price = productDto.Price,
+                    Description = productDto.Description,
+                    Stock = productDto.Stock,
+                    ImagePath = productDto.ImagePath,
+                    MusicPath = productDto.MusicPath
+                };
 
                 await _productService.UpdateProduct(product);
                 _logger.LogInformation($"Product with ID {id} updated successfully.");
