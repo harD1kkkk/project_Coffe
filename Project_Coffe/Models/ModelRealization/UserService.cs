@@ -73,7 +73,7 @@ namespace Project_Coffe.Models.ModelRealization
                     return null;
                 }
 
-                string token = _authService.GenerateToken(user.Id, "User");
+                string token = _authService.GenerateToken(user.Id, user.Role);
                 _logger.LogInformation($"User {email} logged in successfully.");
                 return token;
             }

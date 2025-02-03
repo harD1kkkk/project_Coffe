@@ -58,7 +58,11 @@ namespace CoffeeShopAPI.Services
                     _logger.LogError("Attempted to create a null product.");
                     throw new ArgumentNullException(nameof(product), "Product cannot be null.");
                 }
-
+                if (decimal.Round(product.Price, 2) != product.Price)
+                {
+                    _logger.LogError("Price must be rounded to two decimal places.");
+                    throw new ArgumentException("Price must be rounded to two decimal places.", nameof(product.Price));
+                }
                 await _dbContext.Set<Product>().AddAsync(product);
                 await _dbContext.SaveChangesAsync();
                 _logger.LogInformation("Product created with ID: {ProductId}", product.Id);
@@ -85,6 +89,11 @@ namespace CoffeeShopAPI.Services
                 {
                     _logger.LogWarning($"Product with ID {product.Id} not found for update.");
                     throw new KeyNotFoundException($"Product with ID {product.Id} not found.");
+                }
+                if (decimal.Round(product.Price, 2) != product.Price)
+                {
+                    _logger.LogError("Price must be rounded to two decimal places.");
+                    throw new ArgumentException("Price must be rounded to two decimal places.", nameof(product.Price));
                 }
 
                 _dbContext.Set<Product>().Update(product);
