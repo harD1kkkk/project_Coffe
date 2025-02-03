@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
@@ -18,7 +19,8 @@ namespace Project_Coffe.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [Authorize]
+        [HttpGet("get-all-orders")]
         public async Task<IActionResult> GetAllOrders()
         {
             try
@@ -33,7 +35,8 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
+        [HttpGet("get-order-by-id/{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
             try
@@ -53,7 +56,8 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        [HttpPost]
+        [Authorize]
+        [HttpPost("create-order")]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDTO createOrderDto)
         {
             try
@@ -90,8 +94,8 @@ namespace Project_Coffe.Controllers
             }
         }
 
-
-        [HttpPut("{id}")]
+        [Authorize]
+        [HttpPut("update-order/{id}")]
         public async Task<IActionResult> UpdateOrder(int id, [FromBody] UpdateOrderDTO updateOrderDto)
         {
             try
@@ -134,7 +138,8 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("delete-order/{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             try

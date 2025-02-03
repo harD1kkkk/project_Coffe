@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
@@ -20,7 +22,8 @@ namespace Project_Coffe.Controllers
             _environment = environment;
         }
 
-        [HttpGet]
+        //[Authorize]
+        [HttpGet("get-all-products")]
         public async Task<IActionResult> GetAllProducts()
         {
             try
@@ -36,7 +39,8 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
+        [HttpGet("get-product-by-id/{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
             try
@@ -58,8 +62,8 @@ namespace Project_Coffe.Controllers
             }
         }
 
-
-        [HttpPost]
+        //[Authorize(Roles = "Admin")]
+        [HttpPost("create-product-and-upload")]
         public async Task<IActionResult> CreateProductAndUpload(IFormFile imageFile, IFormFile musicFile, [FromForm] CreateProductDTO productDto)
         {
             try
@@ -92,6 +96,8 @@ namespace Project_Coffe.Controllers
                 {
                     Name = productDto.Name,
                     Price = productDto.Price,
+                    Description = productDto.Description,
+                    Stock = productDto.Stock,
                     ImagePath = $"/images/{imageFile.FileName}",
                     MusicPath = $"/music/{musicFile.FileName}"
                 };
@@ -107,7 +113,8 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        [HttpPut("update-product/{id}")]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductDTO productDto)
         {
             try
@@ -140,7 +147,85 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        //[Authorize(Roles = "Admin")]
+        [HttpPut("update-imageFile/{id}")]
+        public async Task<IActionResult> UpdateProductImageFile(int id, IFormFile imageFile)
+        {
+            try
+            {
+                if (imageFile == null || imageFile.Length == 0)
+                {
+                    _logger.LogWarning("Upload failed: Image file is missing or empty.");
+                    return BadRequest("Image file is required.");
+                }
+
+                Product? existingProduct = await _productService.GetProductById(id);
+                if (existingProduct == null)
+                {
+                    _logger.LogWarning($"Product with ID {id} not found.");
+                    return NotFound($"Product with ID {id} not found.");
+                }
+
+                string imagePath = Path.Combine(_environment.WebRootPath, "images", imageFile.FileName);
+                using (var stream = new FileStream(imagePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                existingProduct.ImagePath = $"/images/{imageFile.FileName}";
+
+                await _productService.UpdateProductImage(id, existingProduct);
+                _logger.LogInformation($"Product Image with ID {id} updated successfully.");
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error updating product image: {ex.Message}");
+                return StatusCode(500, "An error occurred while updating the product image.");
+            }
+        }
+
+
+        //[Authorize(Roles = "Admin")]
+        [HttpPut("update-MusicFile/{id}")]
+        public async Task<IActionResult> UpdateProductMusicFile(int id, IFormFile musicFile)
+        {
+            try
+            {
+                if (musicFile == null || musicFile.Length == 0)
+                {
+                    _logger.LogWarning("Upload failed: Music file is missing or empty.");
+                    return BadRequest("Music file is required.");
+                }
+
+                Product? existingProduct = await _productService.GetProductById(id);
+                if (existingProduct == null)
+                {
+                    _logger.LogWarning($"Product with ID {id} not found.");
+                    return NotFound($"Product with ID {id} not found.");
+                }
+
+                string musicPath = Path.Combine(_environment.WebRootPath, "Music", musicFile.FileName);
+                using (var stream = new FileStream(musicPath, FileMode.Create))
+                {
+                    await musicFile.CopyToAsync(stream);
+                }
+
+                existingProduct.MusicPath = $"/Music/{musicFile.FileName}";
+
+                await _productService.UpdateProductImage(id, existingProduct);
+                _logger.LogInformation($"Product Music with ID {id} updated successfully.");
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error updating product Music: {ex.Message}");
+                return StatusCode(500, "An error occurred while updating the product Music.");
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("delete-product/{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             try

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
 
@@ -77,7 +78,8 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
+        [HttpGet("get-user-by-id/{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
             try
@@ -98,8 +100,9 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, string name, string email, string password)
+        [Authorize(Roles = "Admin")]
+        [HttpPut("update-user/{id}")]
+        public async Task<IActionResult> UpdateUser(int id, string name, string email, string password, string role)
         {
             try
             {
@@ -108,7 +111,7 @@ namespace Project_Coffe.Controllers
                     _logger.LogWarning("Invalid user data received");
                     return BadRequest(ModelState);
                 }
-                User? updatedUser = await _userService.UpdateUser(id, name, email, password);
+                User? updatedUser = await _userService.UpdateUser(id, name, email, password, role);
                 if (updatedUser == null)
                 {
                     _logger.LogWarning($"Update failed: User with ID {id} not found.");
@@ -125,7 +128,8 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("delete-user/{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             try

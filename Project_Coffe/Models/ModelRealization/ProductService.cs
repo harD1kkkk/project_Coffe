@@ -97,6 +97,53 @@ namespace CoffeeShopAPI.Services
             }
         }
 
+        public async Task UpdateProductImage(int productId, Product product)
+        {
+            try
+            {
+                Product? existingProduct = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);
+                if (existingProduct == null)
+                {
+                    _logger.LogWarning($"Product with ID {productId} not found.");
+                    throw new KeyNotFoundException($"Product with ID {productId} not found.");
+                }
+
+                existingProduct.ImagePath = product.ImagePath;
+
+                _dbContext.Products.Update(existingProduct);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error updating product image with ID {productId}: {ex.Message}");
+                throw;
+            }
+        }
+
+
+        public async Task UpdateProductMusic(int productId, Product product)
+        {
+            try
+            {
+                Product? existingProduct = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);
+                if (existingProduct == null)
+                {
+                    _logger.LogWarning($"Product with ID {productId} not found.");
+                    throw new KeyNotFoundException($"Product with ID {productId} not found.");
+                }
+
+                existingProduct.MusicPath = product.MusicPath;
+
+                _dbContext.Products.Update(existingProduct);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error updating product music with ID {productId}: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task DeleteProduct(int productId)
         {
             try
