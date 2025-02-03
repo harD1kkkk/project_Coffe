@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
@@ -100,7 +101,7 @@ namespace Project_Coffe.Controllers
                     Stock = productDto.Stock,
                     ImagePath = $"{defaultPath}/images/{imageFile.FileName}",
                     MusicPath = $"{defaultPath}/music/{musicFile.FileName}"
-                };
+                    };
 
                 await _productService.CreateProduct(product);
                 _logger.LogInformation($"Product with ID {product.Id} created successfully.");

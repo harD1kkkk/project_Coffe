@@ -81,6 +81,7 @@ namespace Project_Coffe.Models.ModelRealization
                 .FirstOrDefaultAsync(o => o.UserId == userId && o.IsActive);
         }
 
+
         public async Task AddProductsToActiveOrder(int orderId, List<OrderProduct> orderProducts)
         {
             Order? order = await _dbContext.Set<Order>()
@@ -124,6 +125,7 @@ namespace Project_Coffe.Models.ModelRealization
             await _dbContext.SaveChangesAsync();
         }
 
+
         public async Task<Order> CreateOrder(int userId, List<OrderProduct> orderProducts)
         {
             Order order = new Order
@@ -154,12 +156,13 @@ namespace Project_Coffe.Models.ModelRealization
                         _logger.LogError($"Product with ID {orderProduct.ProductId} not found.");
                         throw new Exception($"Product with ID {orderProduct.ProductId} not found.");
                     }
+
                     if (existingProduct.Stock < orderProduct.Quantity)
                     {
                         _logger.LogError($"Not enough stock for product with ID {orderProduct.ProductId}. Available: {existingProduct.Stock}, Requested: {orderProduct.Quantity}");
                         throw new Exception($"Not enough stock for product with ID {orderProduct.ProductId}. Available: {existingProduct.Stock}, Requested: {orderProduct.Quantity}");
                     }
-
+                    
                     orderProduct.OrderId = order.Id;
                     orderProduct.Product = existingProduct;
                     orderProduct.CalculateSubtotal();
