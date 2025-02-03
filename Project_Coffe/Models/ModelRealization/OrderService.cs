@@ -156,7 +156,8 @@ namespace Project_Coffe.Models.ModelRealization
                         _logger.LogError($"Product with ID {orderProduct.ProductId} not found.");
                         throw new Exception($"Product with ID {orderProduct.ProductId} not found.");
                     }
-                    if (existingProduct.Stock < orderProduct.Quantity)
+
+                    if(existingProduct.Stock < orderProduct.Quantity)
                     {
                         _logger.LogError($"Not enough stock for product with ID {orderProduct.ProductId}. Available: {existingProduct.Stock}, Requested: {orderProduct.Quantity}");
                         throw new Exception($"Not enough stock for product with ID {orderProduct.ProductId}. Available: {existingProduct.Stock}, Requested: {orderProduct.Quantity}");
