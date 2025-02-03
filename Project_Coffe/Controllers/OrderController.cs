@@ -65,8 +65,8 @@ namespace Project_Coffe.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var userId = createOrderDto.UserId;
-                var orderProductsDto = createOrderDto.OrderProducts;
+                int userId = createOrderDto.UserId;
+                List<CreateOrderProductDTO>? orderProductsDto = createOrderDto.OrderProducts;
 
                 if (orderProductsDto == null || !orderProductsDto.Any())
                 {
@@ -74,13 +74,13 @@ namespace Project_Coffe.Controllers
                     return BadRequest("Order products cannot be null or empty.");
                 }
 
-                var orderProducts = orderProductsDto.Select(dto => new OrderProduct
+                List<OrderProduct> orderProducts = orderProductsDto.Select(dto => new OrderProduct
                 {
                     ProductId = dto.ProductId,
                     Quantity = dto.Quantity
                 }).ToList();
 
-                var order = await _orderService.CreateOrUpdateOrder(userId, orderProducts);
+                Order order = await _orderService.CreateOrUpdateOrder(userId, orderProducts);
 
                 return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);
             }
