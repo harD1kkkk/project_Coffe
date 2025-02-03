@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
+using System.Net.Http.Headers;
 
 namespace Project_Coffe.Controllers
 {
@@ -13,12 +15,14 @@ namespace Project_Coffe.Controllers
         private readonly IProductService _productService;
         private readonly ILogger<ProductController> _logger;
         private readonly IWebHostEnvironment _environment;
+        private readonly string? _virusTotalApiKey;
 
-        public ProductController(IProductService productService, ILogger<ProductController> logger, IWebHostEnvironment environment)
+        public ProductController(IProductService productService, ILogger<ProductController> logger, IWebHostEnvironment environment, IConfiguration configuration)
         {
             _productService = productService;
             _logger = logger;
             _environment = environment;
+            _virusTotalApiKey = configuration["VirusTotal:ApiKey"];
         }
 
         [Authorize]
@@ -72,6 +76,20 @@ namespace Project_Coffe.Controllers
                     _logger.LogWarning("Upload failed: One or more files are missing or empty.");
                     return BadRequest("Both image and music files are required.");
                 }
+
+                if (!await IsFileSafeAsync(imageFile))
+                {
+                    _logger.LogWarning("Virus scan failed: The image file is infected or unsafe.");
+                    return BadRequest("The uploaded image file is unsafe.");
+                }
+                _logger.LogInformation("Virus scan good: The image file is safe.");
+
+                if (!await IsFileSafeAsync(musicFile))
+                {
+                    _logger.LogWarning("Virus scan failed: The music file is infected or unsafe.");
+                    return BadRequest("The uploaded music file is unsafe.");
+                }
+                _logger.LogInformation("Virus scan good: The music file is safe.");
 
                 string imagePath = Path.Combine(_environment.WebRootPath, "images", imageFile.FileName);
                 using (var stream = new FileStream(imagePath, FileMode.Create))
@@ -158,6 +176,12 @@ namespace Project_Coffe.Controllers
                     _logger.LogWarning("Upload failed: Image file is missing or empty.");
                     return BadRequest("Image file is required.");
                 }
+                if (!await IsFileSafeAsync(imageFile))
+                {
+                    _logger.LogWarning("Virus scan failed: The image file is infected or unsafe.");
+                    return BadRequest("The uploaded image file is unsafe.");
+                }
+                _logger.LogInformation("Virus scan good: The image file is safe.");
 
                 Product? existingProduct = await _productService.GetProductById(id);
                 if (existingProduct == null)
@@ -198,6 +222,12 @@ namespace Project_Coffe.Controllers
                     _logger.LogWarning("Upload failed: Music file is missing or empty.");
                     return BadRequest("Music file is required.");
                 }
+                if (!await IsFileSafeAsync(musicFile))
+                {
+                    _logger.LogWarning("Virus scan failed: The music file is infected or unsafe.");
+                    return BadRequest("The uploaded music file is unsafe.");
+                }
+                _logger.LogInformation("Virus scan good: The music file is safe.");
 
                 Product? existingProduct = await _productService.GetProductById(id);
                 if (existingProduct == null)
@@ -263,6 +293,73 @@ namespace Project_Coffe.Controllers
             {
                 _logger.LogError($"Error fetching products: {ex.Message}");
                 return StatusCode(500, "An error occurred while fetching the products.");
+            }
+        }
+        private async Task<bool> IsFileSafeAsync(IFormFile file)
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("x-apikey", _virusTotalApiKey);
+
+                using (var content = new MultipartFormDataContent())
+                {
+                    var streamContent = new StreamContent(file.OpenReadStream());
+                    streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+                    content.Add(streamContent, "file", file.FileName);
+
+                    var response = await client.PostAsync("https://www.virustotal.com/api/v3/files", content);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        _logger.LogError("Error uploading file to VirusTotal API.");
+                        return false;
+                    }
+
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    dynamic jsonResponse = JsonConvert.DeserializeObject(responseData);
+
+                    if (jsonResponse?.data?.id == null)
+                    {
+                        _logger.LogError("Invalid response from VirusTotal API.");
+                        return false;
+                    }
+
+                    string analysisId = jsonResponse.data.id;
+                    bool isCompleted = false;
+                    dynamic analysisResult = null;
+                    int count = 0; 
+
+                    while (!isCompleted && count < 10)
+                    {
+                        var analysisResponse = await client.GetAsync($"https://www.virustotal.com/api/v3/analyses/{analysisId}");
+
+                        if (!analysisResponse.IsSuccessStatusCode)
+                        {
+                            _logger.LogError("Error retrieving analysis from VirusTotal API.");
+                            return false;
+                        }
+
+                        var analysisResponseData = await analysisResponse.Content.ReadAsStringAsync();
+                        analysisResult = JsonConvert.DeserializeObject(analysisResponseData);
+
+                        if (analysisResult?.data?.attributes?.status == "completed")
+                        {
+                            isCompleted = true;
+                            break;
+                        }
+
+                        count++;
+                        await Task.Delay(5000);  
+                    }
+
+                    if (!isCompleted)
+                    {
+                        _logger.LogWarning("VirusTotal analysis did not complete in time.");
+                        return false;
+                    }
+
+                    int maliciousCount = analysisResult.data.attributes.stats.malicious;
+                    return maliciousCount == 0;
+                }
             }
         }
     }
