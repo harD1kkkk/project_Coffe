@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Project_Coffe.Data;
 using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
+using System.Net.Http.Headers;
 
 namespace CoffeeShopAPI.Services
 {
@@ -10,11 +12,13 @@ namespace CoffeeShopAPI.Services
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly ILogger<ProductService> _logger;
+        private readonly string? _virusTotalApiKey;
 
-        public ProductService(ApplicationDbContext dbContext, ILogger<ProductService> logger)
+        public ProductService(ApplicationDbContext dbContext, ILogger<ProductService> logger, IConfiguration configuration)
         {
             _dbContext = dbContext;
             _logger = logger;
+            _virusTotalApiKey = configuration["VirusTotal:ApiKey"];
         }
 
         public async Task<IEnumerable<Product>> GetAllProducts()
@@ -209,6 +213,73 @@ namespace CoffeeShopAPI.Services
             {
                 _logger.LogError($"Error fetching filtered products: {ex.Message}");
                 throw new Exception("An error occurred while fetching the products.");
+            }
+        }
+        public async Task<bool> IsFileSafeAsync(IFormFile file)
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("x-apikey", _virusTotalApiKey);
+
+                using (var content = new MultipartFormDataContent())
+                {
+                    var streamContent = new StreamContent(file.OpenReadStream());
+                    streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+                    content.Add(streamContent, "file", file.FileName);
+
+                    var response = await client.PostAsync("https://www.virustotal.com/api/v3/files", content);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        _logger.LogError("Error uploading file to VirusTotal API.");
+                        return false;
+                    }
+
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    dynamic? jsonResponse = JsonConvert.DeserializeObject(responseData);
+
+                    if (jsonResponse?.data?.id == null)
+                    {
+                        _logger.LogError("Invalid response from VirusTotal API.");
+                        return false;
+                    }
+
+                    string analysisId = jsonResponse.data.id;
+                    bool isCompleted = false;
+                    dynamic? analysisResult = null;
+                    int count = 0;
+
+                    while (!isCompleted && count < 10)
+                    {
+                        var analysisResponse = await client.GetAsync($"https://www.virustotal.com/api/v3/analyses/{analysisId}");
+
+                        if (!analysisResponse.IsSuccessStatusCode)
+                        {
+                            _logger.LogError("Error retrieving analysis from VirusTotal API.");
+                            return false;
+                        }
+
+                        var analysisResponseData = await analysisResponse.Content.ReadAsStringAsync();
+                        analysisResult = JsonConvert.DeserializeObject(analysisResponseData);
+
+                        if (analysisResult?.data?.attributes?.status == "completed")
+                        {
+                            isCompleted = true;
+                            break;
+                        }
+
+                        count++;
+                        await Task.Delay(5000);
+                    }
+
+                    if (!isCompleted)
+                    {
+                        _logger.LogWarning("VirusTotal analysis did not complete in time.");
+                        return false;
+                    }
+
+                    int maliciousCount = analysisResult.data.attributes.stats.malicious;
+                    return maliciousCount == 0;
+                }
             }
         }
     }

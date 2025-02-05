@@ -80,7 +80,6 @@ namespace Project_Coffe.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
-
         public async Task<IActionResult> GetUserById(int id)
         {
             try
