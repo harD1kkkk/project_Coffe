@@ -13,5 +13,6 @@ namespace Project_Coffe.Models.ModelInterface
         Task UpdateProductMusic(int productId, Product product);
         Task DeleteProduct(int productId);
         Task<IEnumerable<Product>> SearchAndSort(ProductFilterDto filter);
+        Task<bool> IsFileSafeAsync(IFormFile file);
     }
 }
