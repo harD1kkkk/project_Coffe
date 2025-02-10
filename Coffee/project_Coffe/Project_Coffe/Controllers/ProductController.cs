@@ -161,7 +161,7 @@ namespace Project_Coffe.Controllers
             }
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("update-imageFile/{id}")]
         public async Task<IActionResult> UpdateProductImageFile(int id, IFormFile imageFile)
         {
