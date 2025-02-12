@@ -24,21 +24,31 @@ namespace Project_Coffe.Models.ModelRealization
                     _logger.LogWarning("preferences null");
                     throw new ArgumentNullException(nameof(preferences));
                 }
+                User? user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == preferences.UserId);
+                if (user == null)
+                {
+                    _logger.LogWarning($"User with ID {preferences.UserId} not found.");
+                    return null;
+                }
                 preferences.Response = true;
                 await _dbContext.Set<UserPreference>().AddAsync(preferences);
                 await _dbContext.SaveChangesAsync();
+                int preferenceId = preferences.Id;
                 string? response = "";
                 int count = 0;
 
                 while (true)
                 {
-                    UserPreference? userPreference = await _dbContext.UserPreferences.FirstOrDefaultAsync(up => up.UserId == preferences.UserId);
-                    if (userPreference == null)
+                    UserPreference? currentPreference = await _dbContext.UserPreferences
+                                  .AsNoTracking()
+                                  .FirstOrDefaultAsync(up => up.Id == preferenceId);
+                    if (currentPreference == null)
                     {
-                        _logger.LogWarning($"preferences with ID {preferences.Id} not found.");
+                        _logger.LogWarning($"preferences with ID {preferenceId} not found.");
                         break;
                     }
-                    if (userPreference.ResponseFromMircoService == false)
+
+                    if (currentPreference.ResponseFromMicroService == false)
                     {
                         if (count > 10)
                         {
@@ -48,21 +58,25 @@ namespace Project_Coffe.Models.ModelRealization
                         count++;
                         await Task.Delay(1000);
                     }
-                    if (userPreference.ResponseFromMircoService)
+                    if (currentPreference.ResponseFromMicroService)
                     {
-                        response = userPreference.ResponseFromGPT;
-                        _dbContext.Set<UserPreference>().Remove(userPreference);
-                        await _dbContext.SaveChangesAsync();
-                        _logger.LogInformation($"User Preference deleted with ID: {userPreference.Id}");
+                        response = currentPreference.ResponseFromGPT;
+                        UserPreference? preferenceToDelete = await _dbContext.UserPreferences.FindAsync(preferenceId);
+                        if (preferenceToDelete != null)
+                        {
+                            _dbContext.UserPreferences.Remove(preferenceToDelete);
+                            await _dbContext.SaveChangesAsync();
+                            _logger.LogInformation($"User Preference deleted with ID: {currentPreference.Id}");
+                        }
                         break;
                     }
                 }
-                return preferences.ResponseFromGPT = response;
+                return response;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error sending to microservice: {ex.Message}");
-                throw new Exception("An error occurred while sending to microservice.");
+                throw new Exception("An error occurred while sending to microservice.", ex);
             }
         }
     }

@@ -32,7 +32,7 @@ namespace Project_Coffe.Middleware
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-            var errorDetails = new ErrorDetails
+            ErrorDetails errorDetails = new ErrorDetails
             {
                 StatusCode = context.Response.StatusCode,
                 Message = "Internal server error. Please try again later."

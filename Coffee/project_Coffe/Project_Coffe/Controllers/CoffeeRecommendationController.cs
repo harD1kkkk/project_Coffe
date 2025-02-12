@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Project_Coffe.DTO;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
@@ -18,6 +19,7 @@ namespace Project_Coffe.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> RecommendCoffee([FromBody] CreateUserPreferencesDTO preferences)
         {
@@ -46,14 +48,14 @@ namespace Project_Coffe.Controllers
                     MilkPreference = preferences.MilkPreference,
                     ResponseFromGPT = "",
                     Response = true,
-                    ResponseFromMircoService = false
+                    ResponseFromMicroService = false
                 };
                 string response = await _coffeeRecommendation.SendToMicroServiceCoffeeRecommendation(userpreferences);
-                _logger.LogInformation("Coffee recommendation sent successfully.");
                 if (response == null)
                 {
                     return StatusCode(500, "Internal server error");
                 }
+                _logger.LogInformation("Coffee recommendation sent successfully.");
                 return Ok(response);
 
             }

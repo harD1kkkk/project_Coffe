@@ -12,6 +12,6 @@ namespace Project_Coffe.Entities
         public string? MilkPreference { get; set; }
         public string? ResponseFromGPT { get; set; }
         public bool Response { get; set; } = true;
-        public bool ResponseFromMircoService { get; set; } = false;
+        public bool ResponseFromMicroService { get; set; } = false;
     }
 }
