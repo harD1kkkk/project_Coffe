@@ -185,26 +185,24 @@ namespace CoffeeShopAPI.Services
             {
                 IQueryable<Product> products = _dbContext.Set<Product>();
 
-                if (!string.IsNullOrEmpty(filter.Name))
+                if (!string.IsNullOrEmpty(filter.SearchTerm))
                 {
-                    products = products.Where(p => p.Name != null && p.Name.Contains(filter.Name));
+                    products = products.Where(p => p.Name != null && p.Name.Contains(filter.SearchTerm));
                 }
 
-                if (filter.Price.HasValue)
+                switch (filter.SortBy?.ToLower())
                 {
-                    products = products.Where(p => p.Price <= filter.Price);
-                }
+                    case "name":
+                        products = products.OrderBy(p => p.Name);
+                        break;
 
-                if (filter.SortLowOrHighPrice.HasValue)
-                {
-                    if (filter.SortLowOrHighPrice == true)
-                    {
+                    case "low-price":
                         products = products.OrderBy(p => p.Price);
-                    }
-                    else
-                    {
+                        break;
+
+                    case "high-price":
                         products = products.OrderByDescending(p => p.Price);
-                    }
+                        break;
                 }
 
                 return await products.ToListAsync();
@@ -248,7 +246,7 @@ namespace CoffeeShopAPI.Services
                     dynamic? analysisResult = null;
                     int count = 0;
 
-                    while (!isCompleted && count < 10)
+                    while (!isCompleted && count < 30)
                     {
                         var analysisResponse = await client.GetAsync($"https://www.virustotal.com/api/v3/analyses/{analysisId}");
 

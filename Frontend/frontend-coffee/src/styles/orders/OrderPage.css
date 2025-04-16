@@ -1,0 +1,13 @@
+/* src/styles/orders/OrderPage.css */
+.page {
+	padding: 2rem;
+	max-width: 800px;
+	margin: auto;
+}
+
+.page__title {
+	text-align: center;
+	color: #333;
+	font-size: 2rem;
+	margin-bottom: 2rem;
+}

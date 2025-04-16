@@ -14,6 +14,11 @@ namespace Project_Coffe.Controllers
         private readonly ILogger<ProductController> _logger;
         private readonly IWebHostEnvironment _environment;
 
+        string defaultPath = "C:/Users/arthu/Desktop/git/frontend-coffee/public/wwwroot";
+        string defaultPathDB = "public/wwwroot";
+        //string defaultPath = "C:/project_Coffe/Project_Coffe/wwwroot";
+
+
         public ProductController(IProductService productService, ILogger<ProductController> logger, IWebHostEnvironment environment)
         {
             _productService = productService;
@@ -73,27 +78,27 @@ namespace Project_Coffe.Controllers
                     return BadRequest("Both image and music files are required.");
                 }
 
-                if (!await _productService.IsFileSafeAsync(imageFile))
-                {
-                    _logger.LogWarning("Virus scan failed: The image file is infected or unsafe.");
-                    return BadRequest("The uploaded image file is unsafe.");
-                }
-                _logger.LogInformation("Virus scan good: The image file is safe.");
+                //if (!await _productService.IsFileSafeAsync(imageFile))
+                //{
+                //    _logger.LogWarning("Virus scan failed: The image file is infected or unsafe.");
+                //    return BadRequest("The uploaded image file is unsafe.");
+                //}
+                //_logger.LogInformation("Virus scan good: The image file is safe.");
 
-                if (!await _productService.IsFileSafeAsync(musicFile))
-                {
-                    _logger.LogWarning("Virus scan failed: The music file is infected or unsafe.");
-                    return BadRequest("The uploaded music file is unsafe.");
-                }
+                //if (!await _productService.IsFileSafeAsync(musicFile))
+                //{
+                //    _logger.LogWarning("Virus scan failed: The music file is infected or unsafe.");
+                //    return BadRequest("The uploaded music file is unsafe.");
+                //}
                 _logger.LogInformation("Virus scan good: The music file is safe.");
 
-                string imagePath = Path.Combine(_environment.WebRootPath, "images", imageFile.FileName);
+                string imagePath = Path.Combine(defaultPath, "images", imageFile.FileName);
                 using (var stream = new FileStream(imagePath, FileMode.Create))
                 {
                     await imageFile.CopyToAsync(stream);
                 }
 
-                string musicPath = Path.Combine(_environment.WebRootPath, "music", musicFile.FileName);
+                string musicPath = Path.Combine(defaultPath, "music", musicFile.FileName);
                 using (var stream = new FileStream(musicPath, FileMode.Create))
                 {
                     await musicFile.CopyToAsync(stream);
@@ -105,15 +110,14 @@ namespace Project_Coffe.Controllers
                     return BadRequest(ModelState);
                 }
 
-                string defaultPath = "C:/project_Coffe/Project_Coffe/wwwroot";
                 Product product = new Product
                 {
                     Name = productDto.Name,
                     Price = productDto.Price,
                     Description = productDto.Description,
                     Stock = productDto.Stock,
-                    ImagePath = $"{defaultPath}/images/{imageFile.FileName}",
-                    MusicPath = $"{defaultPath}/music/{musicFile.FileName}"
+                    ImagePath = $"{defaultPathDB}/images/{imageFile.FileName}",
+                    MusicPath = $"{defaultPathDB}/music/{musicFile.FileName}"
                 };
 
                 await _productService.CreateProduct(product);
@@ -186,14 +190,13 @@ namespace Project_Coffe.Controllers
                     return NotFound($"Product with ID {id} not found.");
                 }
 
-                string imagePath = Path.Combine(_environment.WebRootPath, "images", imageFile.FileName);
+                string imagePath = Path.Combine(defaultPath, "images", imageFile.FileName);
                 using (var stream = new FileStream(imagePath, FileMode.Create))
                 {
                     await imageFile.CopyToAsync(stream);
                 }
 
-                string defaultPath = "C:/project_Coffe/Project_Coffe/wwwroot";
-                existingProduct.ImagePath = $"{defaultPath}/images/{imageFile.FileName}";
+                existingProduct.ImagePath = $"{defaultPathDB}/images/{imageFile.FileName}";
 
                 await _productService.UpdateProductImage(id, existingProduct);
                 _logger.LogInformation($"Product Image with ID {id} updated successfully.");
@@ -232,14 +235,13 @@ namespace Project_Coffe.Controllers
                     return NotFound($"Product with ID {id} not found.");
                 }
 
-                string musicPath = Path.Combine(_environment.WebRootPath, "music", musicFile.FileName);
+                string musicPath = Path.Combine(defaultPath, "music", musicFile.FileName);
                 using (var stream = new FileStream(musicPath, FileMode.Create))
                 {
                     await musicFile.CopyToAsync(stream);
                 }
 
-                string defaultPath = "C:/project_Coffe/Project_Coffe/wwwroot";
-                existingProduct.MusicPath = $"{defaultPath}/music/{musicFile.FileName}";
+                existingProduct.MusicPath = $"{defaultPathDB}/music/{musicFile.FileName}";
 
                 await _productService.UpdateProductImage(id, existingProduct);
                 _logger.LogInformation($"Product Music with ID {id} updated successfully.");

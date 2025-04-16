@@ -71,7 +71,7 @@ namespace Project_Coffe.Controllers
                 int userId = createOrderDto.UserId;
                 List<CreateOrderProductDTO>? orderProductsDto = createOrderDto.OrderProducts;
 
-                if (orderProductsDto == null || !orderProductsDto.Any())
+                if (orderProductsDto == null || orderProductsDto.Count == 0)
                 {
                     _logger.LogError("Order products list is null or empty.");
                     return BadRequest("Order products cannot be null or empty.");
@@ -80,7 +80,10 @@ namespace Project_Coffe.Controllers
                 List<OrderProduct> orderProducts = orderProductsDto.Select(dto => new OrderProduct
                 {
                     ProductId = dto.ProductId,
-                    Quantity = dto.Quantity
+                    Quantity = dto.Quantity,
+                    CustomerName = dto.CustomerName,
+                    CustomerEmail = dto.CustomerEmail
+
                 }).ToList();
 
                 Order order = await _orderService.CreateOrUpdateOrder(userId, orderProducts);
@@ -122,7 +125,9 @@ namespace Project_Coffe.Controllers
                     OrderId = id,
                     ProductId = op.ProductId,
                     Quantity = op.Quantity,
-                    Subtotal = op.Subtotal
+                    Subtotal = op.Subtotal,
+                    CustomerName = op.CustomerName,      
+                    CustomerEmail = op.CustomerEmail    
                 }).ToList();
 
                 order.OrderProducts = orderProducts;

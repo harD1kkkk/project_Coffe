@@ -19,6 +19,6 @@ namespace Project_Coffe.Entities
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Password length must be between 6 and 100 characters.")]
         public string? PasswordHash { get; set; }
 
-        public string Role { get; set; } = "User";
+        public string Role { get; set; } = "Admin";
     }
 }

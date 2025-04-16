@@ -1,0 +1,17 @@
+.user-page {
+}
+
+.user-page__title {
+}
+
+.user-page__button {
+	background-color: #007bff;
+	color: #fff;
+	border: none;
+	padding: 12px 20px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 1rem;
+	margin-top: 15px;
+	transition: background-color 0.3s ease;
+}

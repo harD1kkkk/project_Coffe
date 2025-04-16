@@ -4,10 +4,9 @@ namespace Project_Coffe.DTO
 {
     public class CreateOrderProductDTO
     {
-        [Required]
         public int ProductId { get; set; }
-        [Required(ErrorMessage = "Quantity is required")]
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
+        public string CustomerName { get; set; }
+        public string CustomerEmail { get; set; }
         public int Quantity { get; set; }
     }
 }

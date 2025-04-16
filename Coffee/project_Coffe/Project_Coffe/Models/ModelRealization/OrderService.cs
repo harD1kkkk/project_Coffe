@@ -1,7 +1,7 @@
-﻿using Project_Coffe.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Project_Coffe.Data;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
-using Microsoft.EntityFrameworkCore;
 
 namespace Project_Coffe.Models.ModelRealization
 {
@@ -20,6 +20,7 @@ namespace Project_Coffe.Models.ModelRealization
         {
             _logger.LogInformation("Fetching all orders");
             List<Order> orders = await _dbContext.Set<Order>()
+                                         .Include(o => o.User)
                                          .Include(o => o.OrderProducts)
                                          .ThenInclude(op => op.Product)
                                          .ToListAsync();
@@ -33,6 +34,7 @@ namespace Project_Coffe.Models.ModelRealization
             {
                 _logger.LogInformation($"Fetching order with ID: {orderId}");
                 Order? order = await _dbContext.Set<Order>()
+                                             .Include(o => o.User)
                                              .Include(o => o.OrderProducts)
                                              .ThenInclude(op => op.Product)
                                              .FirstOrDefaultAsync(o => o.Id == orderId);

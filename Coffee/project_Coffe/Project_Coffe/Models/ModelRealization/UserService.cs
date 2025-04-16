@@ -126,7 +126,7 @@ namespace Project_Coffe.Models.ModelRealization
                     _logger.LogWarning($"User with ID {userId} not found for update.");
                     return null;
                 }
-                if (await IsEmailTaken(email))
+                if (await IsEmailTaken(email, userId))
                 {
                     _logger.LogWarning($"Email {email} is already taken.");
                     return null;
@@ -213,6 +213,19 @@ namespace Project_Coffe.Models.ModelRealization
             try
             {
                 return await _dbContext.Users.AnyAsync(u => u.Email == email);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error checking if email {email} is taken: {ex.Message}");
+                throw new Exception("An error occurred while checking the email.");
+            }
+        }
+
+        public async Task<bool> IsEmailTaken(string email, int userId)
+        {
+            try
+            {
+                return await _dbContext.Users.AnyAsync(u => u.Email == email && u.Id != userId);
             }
             catch (Exception ex)
             {

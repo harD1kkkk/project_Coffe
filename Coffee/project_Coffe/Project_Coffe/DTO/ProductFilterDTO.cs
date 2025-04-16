@@ -2,8 +2,7 @@
 {
     public class ProductFilterDto
     {
-        public string? Name { get; set; }
-        public decimal? Price { get; set; }
-        public bool? SortLowOrHighPrice { get; set; }
+        public string? SearchTerm { get; set; }
+        public string? SortBy { get; set; }
     }
 }

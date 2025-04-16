@@ -1,0 +1,75 @@
+.new-product-page {
+	max-width: 500px;
+	margin: 0 auto;
+	padding: 30px;
+	background-color: #f9f9f9;
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.new-product-page p {
+	font-size: 1.5rem;
+	text-align: center;
+	font-weight: bold;
+	margin-bottom: 20px;
+	animation: fadeInOut 2s infinite, rainbowText 3s linear infinite;
+}
+
+@keyframes fadeInOut {
+	0%,
+	100% {
+		opacity: 0;
+	}
+	50% {
+		opacity: 1;
+	}
+}
+
+@keyframes rainbowText {
+	0% {
+		color: red;
+	}
+	16.67% {
+		color: orange;
+	}
+	33.33% {
+		color: yellow;
+	}
+	50% {
+		color: green;
+	}
+	66.67% {
+		color: blue;
+	}
+	83.33% {
+		color: indigo;
+	}
+	100% {
+		color: violet;
+	}
+}
+
+.new-product-page h1 {
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+.new-product-form {
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.submit-btn {
+	padding: 10px 16px;
+	background-color: #2196f3;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+.submit-btn:hover {
+	background-color: #1976d2;
+}

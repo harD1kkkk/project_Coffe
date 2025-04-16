@@ -1,0 +1,42 @@
+.auth-page {
+	padding: 20px;
+	font-family: Arial, sans-serif;
+	background-color: #f9f9f9;
+	border-radius: 8px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	max-width: 400px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+.auth-page h1 {
+	font-size: 1.8rem;
+	color: #333;
+	margin-bottom: 20px;
+}
+
+.auth-page__button {
+	background-color: #007bff;
+	color: #fff;
+	border: none;
+	padding: 10px 15px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 1rem;
+	margin-top: 10px;
+	width: 100%;
+}
+
+.auth-page__button:hover {
+	background-color: #0056b3;
+}
+
+.auth-page__toggle {
+	color: #007bff;
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.auth-page__toggle:hover {
+	color: #0056b3;
+}

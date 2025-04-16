@@ -22,6 +22,9 @@
 	<ItemGroup>
 	  <Folder Include="wwwroot\images\" />
 	  <Folder Include="wwwroot\music\" />
+	  <Folder Include="Migrations\" />
+	  <Folder Include="wwwroot\images\" />
+	  <Folder Include="wwwroot\music\" />
 	</ItemGroup>
 
 </Project>

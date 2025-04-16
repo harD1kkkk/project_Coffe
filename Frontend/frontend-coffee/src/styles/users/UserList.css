@@ -1,0 +1,25 @@
+.user-list {
+	margin-top: 30px;
+	padding: 15px;
+	background-color: #f8f9fa;
+	border-radius: 12px;
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-list-item {
+	padding: 15px;
+	border-bottom: 1px solid #e9ecef;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.user-list-item:last-child {
+	border-bottom: none;
+}
+
+.user-list-item p {
+	margin: 0;
+	font-size: 1rem;
+	color: #555;
+}

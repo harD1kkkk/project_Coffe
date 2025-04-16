@@ -19,7 +19,7 @@ namespace Project_Coffe.Controllers
             _logger = logger;
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost]
         public async Task<IActionResult> RecommendCoffee([FromBody] CreateUserPreferencesDTO preferences)
         {

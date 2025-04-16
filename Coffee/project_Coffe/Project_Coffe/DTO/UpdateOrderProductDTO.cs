@@ -14,5 +14,7 @@ namespace Project_Coffe.DTO
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "Subtotal must be positive")]
         public decimal Subtotal { get; set; }
+        public string CustomerName { get; set; }
+        public string CustomerEmail { get; set; }
     }
 }

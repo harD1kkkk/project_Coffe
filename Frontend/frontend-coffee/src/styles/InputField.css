@@ -1,0 +1,18 @@
+.input-field {
+	margin-bottom: 20px;
+}
+
+.input-field__input {
+	width: 100%;
+	padding: 12px;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	font-size: 1rem;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.input-field__input:focus {
+	border-color: #28a745;
+	outline: none;
+	box-shadow: 0 0 6px rgba(40, 167, 69, 0.5);
+}

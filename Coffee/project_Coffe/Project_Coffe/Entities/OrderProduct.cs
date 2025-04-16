@@ -16,6 +16,9 @@ namespace Project_Coffe.Entities
         [Required]
         public Product? Product { get; set; }
 
+        public string CustomerName { get; set; }
+        public string CustomerEmail { get; set; }
+
         [Required(ErrorMessage = "Quantity is required")]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
         public int Quantity { get; set; }

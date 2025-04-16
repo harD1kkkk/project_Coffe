@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Project_Coffe.Entities;
 using Project_Coffe.Models.ModelInterface;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Project_Coffe.Controllers
 {
@@ -69,7 +71,12 @@ namespace Project_Coffe.Controllers
                 }
 
                 _logger.LogInformation($"User {email} logged in successfully.");
-                return Ok(new { Token = token });
+
+                int userId = GetUserIdFromToken(token);
+
+                object user = await GetUserById(userId);
+
+                return Ok(new { Token = token, user });
             }
             catch (Exception ex)
             {
@@ -91,7 +98,7 @@ namespace Project_Coffe.Controllers
                     return NotFound("User not found.");
                 }
 
-                return Ok(new { user.Id, user.Name, user.Email });
+                return Ok(new { user.Id, user.Name, user.Email, user.Role });
             }
             catch (Exception ex)
             {
@@ -165,6 +172,20 @@ namespace Project_Coffe.Controllers
                 _logger.LogError($"Error deleting user with ID {id}: {ex.Message}");
                 return StatusCode(500, "An error occurred while deleting the user.");
             }
+        }
+
+        int GetUserIdFromToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            var userIdClaim = jwtToken.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier || claim.Type == "sub");
+
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return userId;
+            }
+            throw new ArgumentException("Incorrect Token");
         }
     }
 }
